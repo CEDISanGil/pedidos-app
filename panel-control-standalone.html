@@ -379,7 +379,7 @@
                     th { background-color: #4472C4; color: white; font-weight: bold; padding: 8px; border: 1px solid #000; }
                     td { padding: 8px; border: 1px solid #000; }
                 </style></head><body><table>
-                <thead><tr><th>FECHA</th><th>HORA</th><th>RUTA</th><th>SKU</th><th>PRODUCTO</th><th>CANTIDAD</th></tr></thead>
+                <thead><tr><th>FECHA</th><th>HORA</th><th>RUTA</th><th>SKU</th><th>CANTIDAD</th><th>PRODUCTO</th></tr></thead>
                 <tbody>
             `;
 
@@ -390,8 +390,8 @@
                         <td>${pedido.hora}</td>
                         <td>${pedido.ruta}</td>
                         <td>${prod.sku}</td>
-                        <td>${prod.nombre}</td>
                         <td>${prod.cantidad}</td>
+                         <td>${prod.nombre}</td>
                     </tr>`;
                 });
             });

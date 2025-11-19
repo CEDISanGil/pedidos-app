@@ -380,6 +380,30 @@
                 return;
             }
 
+            // Crear arrays separados para productos normales y promociones
+            const productosNormales = [];
+            const productosConPromo = [];
+
+            pedidosFiltrados.forEach(pedido => {
+                pedido.productos.forEach(prod => {
+                    const fila = {
+                        fecha: pedido.fecha,
+                        hora: pedido.hora,
+                        ruta: pedido.ruta,
+                        sku: prod.sku,
+                        cantidad: prod.cantidad,
+                        promo: prod.promo,
+                        nombre: prod.nombre
+                    };
+
+                    if (prod.promo === 'N/A' || !prod.promo) {
+                        productosNormales.push(fila);
+                    } else {
+                        productosConPromo.push(fila);
+                    }
+                });
+            });
+
             // Crear el HTML de la tabla con todas las columnas
             let html = `
                 <html>
@@ -391,6 +415,7 @@
                         td { padding: 8px; border: 1px solid #000; }
                         td.center { text-align: center; }
                         td.right { text-align: right; }
+                        tr.promo { background-color: #fff3cd; }
                     </style>
                 </head>
                 <body>
@@ -409,21 +434,34 @@
                         <tbody>
             `;
 
-            // Recorrer todos los pedidos y productos
-            pedidosFiltrados.forEach(pedido => {
-                pedido.productos.forEach(prod => {
-                    html += `
-                        <tr>
-                            <td class="center">${pedido.fecha}</td>
-                            <td class="center">${pedido.hora}</td>
-                            <td>${pedido.ruta}</td>
-                            <td class="center">${prod.sku}</td>
-                            <td class="right">${prod.cantidad}</td>
-                            <td class="center">${prod.promo}</td>
-                            <td>${prod.nombre}</td>
-                        </tr>
-                    `;
-                });
+            // Primero agregar productos normales
+            productosNormales.forEach(prod => {
+                html += `
+                    <tr>
+                        <td class="center">${prod.fecha}</td>
+                        <td class="center">${prod.hora}</td>
+                        <td>${prod.ruta}</td>
+                        <td class="center">${prod.sku}</td>
+                        <td class="right">${prod.cantidad}</td>
+                        <td class="center">${prod.promo}</td>
+                        <td>${prod.nombre}</td>
+                    </tr>
+                `;
+            });
+
+            // Luego agregar productos con promoción (resaltados en amarillo)
+            productosConPromo.forEach(prod => {
+                html += `
+                    <tr class="promo">
+                        <td class="center">${prod.fecha}</td>
+                        <td class="center">${prod.hora}</td>
+                        <td>${prod.ruta}</td>
+                        <td class="center">${prod.sku}</td>
+                        <td class="right">${prod.cantidad}</td>
+                        <td class="center">${prod.promo}</td>
+                        <td>${prod.nombre}</td>
+                    </tr>
+                `;
             });
 
             html += `

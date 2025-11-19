@@ -149,6 +149,11 @@
             font-weight: bold;
             color: #4285f4;
         }
+        .producto-promo {
+            font-size: 12px;
+            color: #34a853;
+            font-weight: 600;
+        }
         .loading {
             text-align: center;
             padding: 40px;
@@ -280,7 +285,8 @@
                 grupos[key].productos.push({
                     sku: item.sku,
                     nombre: item.producto,
-                    cantidad: item.cantidad
+                    cantidad: item.cantidad,
+                    promo: item.promo || 'N/A'
                 });
             });
 
@@ -352,6 +358,7 @@
                                     <div>
                                         <div class="producto-nombre">${prod.nombre}</div>
                                         <div class="producto-sku">SKU: ${prod.sku}</div>
+                                        ${prod.promo !== 'N/A' ? `<div class="producto-promo">% Promo: ${prod.promo}</div>` : ''}
                                     </div>
                                     <div class="producto-cantidad">${prod.cantidad}</div>
                                 </div>
@@ -373,36 +380,69 @@
                 return;
             }
 
+            // Crear el HTML de la tabla con todas las columnas
             let html = `
-                <html><head><meta charset="utf-8"><style>
-                    table { border-collapse: collapse; width: 100%; }
-                    th { background-color: #4472C4; color: white; font-weight: bold; padding: 8px; border: 1px solid #000; }
-                    td { padding: 8px; border: 1px solid #000; }
-                </style></head><body><table>
-                <thead><tr><th>FECHA</th><th>HORA</th><th>RUTA</th><th>SKU</th><th>CANTIDAD</th><th>PRODUCTO</th></tr></thead>
-                <tbody>
+                <html>
+                <head>
+                    <meta charset="utf-8">
+                    <style>
+                        table { border-collapse: collapse; width: 100%; }
+                        th { background-color: #4472C4; color: white; font-weight: bold; padding: 8px; border: 1px solid #000; text-align: center; }
+                        td { padding: 8px; border: 1px solid #000; }
+                        td.center { text-align: center; }
+                        td.right { text-align: right; }
+                    </style>
+                </head>
+                <body>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>FECHA</th>
+                                <th>HORA</th>
+                                <th>RUTA</th>
+                                <th>SKU</th>
+                                <th>CANTIDAD</th>
+                                <th>PROMO</th>
+                                <th>PRODUCTO</th>
+                            </tr>
+                        </thead>
+                        <tbody>
             `;
 
+            // Recorrer todos los pedidos y productos
             pedidosFiltrados.forEach(pedido => {
                 pedido.productos.forEach(prod => {
-                    html += `<tr>
-                        <td>${pedido.fecha}</td>
-                        <td>${pedido.hora}</td>
-                        <td>${pedido.ruta}</td>
-                        <td>${prod.sku}</td>
-                        <td>${prod.cantidad}</td>
-                         <td>${prod.nombre}</td>
-                    </tr>`;
+                    html += `
+                        <tr>
+                            <td class="center">${pedido.fecha}</td>
+                            <td class="center">${pedido.hora}</td>
+                            <td>${pedido.ruta}</td>
+                            <td class="center">${prod.sku}</td>
+                            <td class="right">${prod.cantidad}</td>
+                            <td class="center">${prod.promo}</td>
+                            <td>${prod.nombre}</td>
+                        </tr>
+                    `;
                 });
             });
 
-            html += '</tbody></table></body></html>';
+            html += `
+                        </tbody>
+                    </table>
+                </body>
+                </html>
+            `;
 
-            const blob = new Blob([html], { type: 'application/vnd.ms-excel' });
+            // Crear y descargar el archivo
+            const blob = new Blob([html], { type: 'application/vnd.ms-excel;charset=utf-8' });
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
-            link.download = `Pedidos_${new Date().toISOString().split('T')[0]}.xls`;
+            
+            const rutaTexto = filtroRuta || 'TODAS';
+            const fecha = new Date().toISOString().split('T')[0];
+            link.download = `Pedidos_${rutaTexto}_${fecha}.xls`;
+            
             link.click();
             URL.revokeObjectURL(url);
         }
@@ -430,11 +470,11 @@
             });
 
             let txt = '';
-            Object.keys(consolidado).forEach(sku => {
+            Object.keys(consolidado).sort().forEach(sku => {
                 txt += `${sku}|${consolidado[sku]}\n`;
             });
 
-            const blob = new Blob([txt], { type: 'text/plain' });
+            const blob = new Blob([txt], { type: 'text/plain;charset=utf-8' });
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;

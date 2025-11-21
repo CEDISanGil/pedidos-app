@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pedido de Productos</title>
+    <title>Pedido de Productos - Coca-Cola</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #f40009 0%, #d40007 100%);
             min-height: 100vh;
             padding: 20px;
         }
@@ -17,17 +17,28 @@
             margin: 0 auto;
             background: white;
             border-radius: 15px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
             overflow: hidden;
         }
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #f40009 0%, #d40007 100%);
             color: white;
-            padding: 30px 20px;
+            padding: 25px 20px;
             text-align: center;
+            position: relative;
         }
-        .header h1 { font-size: 24px; margin-bottom: 5px; }
-        .header p { opacity: 0.9; font-size: 14px; }
+        .logo {
+            width: 180px;
+            height: auto;
+            margin-bottom: 15px;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+        }
+        .header h1 { 
+            font-size: 24px; 
+            margin-bottom: 5px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        .header p { opacity: 0.95; font-size: 14px; }
         .content { padding: 20px; }
         .form-group { margin-bottom: 20px; }
         label {
@@ -46,7 +57,7 @@
         }
         select:focus, input:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #f40009;
         }
         .search-box { margin-bottom: 15px; }
         .productos-lista {
@@ -98,12 +109,12 @@
         }
         .promo-checkbox label {
             font-size: 10px;
-            color: #ff6b6b;
+            color: #f40009;
             font-weight: bold;
             margin: 0;
         }
         .total-badge {
-            background: #667eea;
+            background: linear-gradient(135deg, #f40009 0%, #d40007 100%);
             color: white;
             padding: 15px;
             border-radius: 8px;
@@ -117,19 +128,32 @@
         .btn {
             width: 100%;
             padding: 15px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #f40009 0%, #d40007 100%);
             color: white;
             border: none;
             border-radius: 8px;
             font-size: 18px;
             font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 6px rgba(244, 0, 9, 0.3);
         }
-        .btn:hover { transform: translateY(-2px); }
+        .btn:hover { 
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(244, 0, 9, 0.4);
+        }
         .btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
+        }
+        .btn-secondary {
+            background: white;
+            color: #f40009;
+            border: 2px solid #f40009;
+            margin-bottom: 15px;
+        }
+        .btn-secondary:hover {
+            background: #fff5f5;
         }
         .alert {
             padding: 15px;
@@ -147,6 +171,11 @@
             color: #721c24;
             border: 1px solid #f5c6cb;
         }
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
         .hidden { display: none; }
         .promo-alert {
             background: #fff3cd;
@@ -159,11 +188,20 @@
         .promo-alert strong {
             color: #856404;
         }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .button-group .btn {
+            flex: 1;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
+            <img src="https://cedisangil.github.io/pedidos-app/Logo_Coca_cola.jpg" alt="Coca-Cola" class="logo">
             <h1>📦 Pedido de Productos</h1>
             <p>Complete su pedido diario</p>
         </div>
@@ -175,6 +213,10 @@
             
             <div id="alertError" class="alert alert-error hidden">
                 ❌ <span id="errorMessage">Error al enviar</span>
+            </div>
+
+            <div id="alertInfo" class="alert alert-info hidden">
+                ℹ️ <span id="infoMessage"></span>
             </div>
             
             <div class="form-group">
@@ -188,6 +230,12 @@
                     <option value="SG1907">SG1907</option>
                     <option value="SG1908">SG1908</option>
                 </select>
+            </div>
+
+            <div id="btnVerPedidoContainer" class="hidden">
+                <button class="btn btn-secondary" onclick="cargarPedidoDelDia()">
+                    👁️ VER MI PEDIDO DEL DÍA
+                </button>
             </div>
 
             <div id="promoAlert" class="promo-alert hidden">
@@ -356,12 +404,87 @@
         let cantidades = {};
         let promos = {};
         let rutaActual = '';
+        let modoEdicion = false;
         
         function cambiarRuta() {
             rutaActual = document.getElementById('ruta').value;
             const mostrarPromo = RUTAS_CON_PROMO.includes(rutaActual);
             document.getElementById('promoAlert').classList.toggle('hidden', !mostrarPromo);
+            
+            // Mostrar botón de ver pedido si hay una ruta seleccionada
+            document.getElementById('btnVerPedidoContainer').classList.toggle('hidden', !rutaActual);
+            
+            // Limpiar formulario al cambiar de ruta
+            if (!modoEdicion) {
+                cantidades = {};
+                promos = {};
+                actualizarTotal();
+            }
+            
             renderProductos();
+        }
+        
+        async function cargarPedidoDelDia() {
+            const ruta = document.getElementById('ruta').value;
+            const alertInfo = document.getElementById('alertInfo');
+            const infoMessage = document.getElementById('infoMessage');
+            
+            if (!ruta) {
+                alert('Debe seleccionar una ruta primero');
+                return;
+            }
+            
+            alertInfo.classList.add('hidden');
+            
+            try {
+                const fechaHoy = new Date().toLocaleDateString('es-CO');
+                
+                // Buscar pedidos de hoy para esta ruta
+                const response = await fetch(
+                    `${SUPABASE_URL}/rest/v1/pedidos?ruta=eq.${ruta}&fecha=eq.${fechaHoy}&select=*`,
+                    {
+                        headers: {
+                            'apikey': SUPABASE_KEY,
+                            'Authorization': `Bearer ${SUPABASE_KEY}`
+                        }
+                    }
+                );
+                
+                if (!response.ok) throw new Error('Error al cargar pedido');
+                
+                const pedidosHoy = await response.json();
+                
+                if (pedidosHoy.length === 0) {
+                    infoMessage.textContent = 'No hay pedido registrado para hoy. Puede crear uno nuevo.';
+                    alertInfo.classList.remove('hidden');
+                    return;
+                }
+                
+                // Cargar las cantidades y promos
+                cantidades = {};
+                promos = {};
+                
+                pedidosHoy.forEach(item => {
+                    cantidades[item.sku] = item.cantidad;
+                    if (item.promo) {
+                        promos[item.sku] = true;
+                    }
+                });
+                
+                modoEdicion = true;
+                renderProductos();
+                actualizarTotal();
+                
+                infoMessage.textContent = `Pedido cargado. ${pedidosHoy.length} productos encontrados. Puede modificar las cantidades.`;
+                alertInfo.classList.remove('hidden');
+                
+                // Scroll suave hacia arriba
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al cargar el pedido del día');
+            }
         }
         
         function renderProductos(filtro = '') {
@@ -435,10 +558,12 @@
             const btnEnviar = document.getElementById('btnEnviar');
             const alertSuccess = document.getElementById('alertSuccess');
             const alertError = document.getElementById('alertError');
+            const alertInfo = document.getElementById('alertInfo');
             const errorMessage = document.getElementById('errorMessage');
             
             alertSuccess.classList.add('hidden');
             alertError.classList.add('hidden');
+            alertInfo.classList.add('hidden');
             
             if (!ruta) {
                 alert('Debe seleccionar una ruta');
@@ -456,7 +581,7 @@
                         sku: sku,
                         producto: producto?.nombre || '',
                         cantidad: cantidad,
-                        promo: promos[sku] || false
+                        promo: promos[sku] ? 'Sí' : 'N/A'
                     };
                 });
             
@@ -469,6 +594,21 @@
             btnEnviar.textContent = 'Enviando...';
             
             try {
+                const fechaHoy = new Date().toLocaleDateString('es-CO');
+                
+                // Primero eliminar pedidos anteriores de hoy para esta ruta
+                await fetch(
+                    `${SUPABASE_URL}/rest/v1/pedidos?ruta=eq.${ruta}&fecha=eq.${fechaHoy}`,
+                    {
+                        method: 'DELETE',
+                        headers: {
+                            'apikey': SUPABASE_KEY,
+                            'Authorization': `Bearer ${SUPABASE_KEY}`
+                        }
+                    }
+                );
+                
+                // Luego insertar el nuevo pedido
                 const response = await fetch(`${SUPABASE_URL}/rest/v1/pedidos`, {
                     method: 'POST',
                     headers: {
@@ -486,6 +626,7 @@
                 }
                 
                 alertSuccess.classList.remove('hidden');
+                modoEdicion = false;
                 cantidades = {};
                 promos = {};
                 document.getElementById('ruta').value = '';
@@ -493,6 +634,7 @@
                 renderProductos();
                 actualizarTotal();
                 document.getElementById('promoAlert').classList.add('hidden');
+                document.getElementById('btnVerPedidoContainer').classList.add('hidden');
                 
                 setTimeout(() => {
                     alertSuccess.classList.add('hidden');

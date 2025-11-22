@@ -265,6 +265,9 @@
         </div>
     </div>
 
+    <!-- Librería SheetJS para exportar Excel real -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+
     <script>
         const SUPABASE_URL = 'https://etxtmdljkxdaonyldcmn.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV0eHRtZGxqa3hkYW9ueWxkY21uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0NDE1OTAsImV4cCI6MjA3OTAxNzU5MH0.SII1FIsgyuSv1oI1_xJs_MOUvYxNTnJsBEXigbZsosk';
@@ -419,13 +422,13 @@
             pedidosFiltrados.forEach(pedido => {
                 pedido.productos.forEach(prod => {
                     const fila = {
-                        fecha: pedido.fecha,
-                        hora: pedido.hora,
-                        ruta: pedido.ruta,
-                        sku: prod.sku,
-                        cantidad: prod.cantidad,
-                        promo: prod.promo,
-                        nombre: prod.nombre
+                        RUTA: pedido.ruta,
+                        SKU: prod.sku,
+                        CANTIDAD: prod.cantidad,
+                        PROMO: prod.promo,
+                        PRODUCTO: prod.nombre,
+                        FECHA: pedido.fecha,
+                        HORA: pedido.hora
                     };
 
                     if (prod.promo === 'N/A' || !prod.promo) {
@@ -436,85 +439,62 @@
                 });
             });
 
-            // Crear el HTML de la tabla con todas las columnas
-            let html = `
-                <html>
-                <head>
-                    <meta charset="utf-8">
-                    <style>
-                        table { border-collapse: collapse; width: 100%; }
-                        th { background-color: #4472C4; color: white; font-weight: bold; padding: 8px; border: 1px solid #000; text-align: center; }
-                        td { padding: 8px; border: 1px solid #000; }
-                        td.center { text-align: center; }
-                        td.right { text-align: right; }
-                        tr.promo { background-color: #fff3cd; }
-                    </style>
-                </head>
-                <body>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>FECHA</th>
-                                <th>HORA</th>
-                                <th>RUTA</th>
-                                <th>SKU</th>
-                                <th>CANTIDAD</th>
-                                <th>PROMO</th>
-                                <th>PRODUCTO</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-            `;
+            // Combinar productos normales primero, luego promociones
+            const todosLosDatos = [...productosNormales, ...productosConPromo];
 
-            // Primero agregar productos normales
-            productosNormales.forEach(prod => {
-                html += `
-                    <tr>
-                        <td class="center">${prod.fecha}</td>
-                        <td class="center">${prod.hora}</td>
-                        <td>${prod.ruta}</td>
-                        <td class="center">${prod.sku}</td>
-                        <td class="right">${prod.cantidad}</td>
-                        <td class="center">${prod.promo}</td>
-                        <td>${prod.nombre}</td>
-                    </tr>
-                `;
-            });
+            // Obtener rutas únicas para los botones
+            const rutasUnicas = [...new Set(todosLosDatos.map(p => p.RUTA))].sort();
 
-            // Luego agregar productos con promoción (resaltados en amarillo)
-            productosConPromo.forEach(prod => {
-                html += `
-                    <tr class="promo">
-                        <td class="center">${prod.fecha}</td>
-                        <td class="center">${prod.hora}</td>
-                        <td>${prod.ruta}</td>
-                        <td class="center">${prod.sku}</td>
-                        <td class="right">${prod.cantidad}</td>
-                        <td class="center">${prod.promo}</td>
-                        <td>${prod.nombre}</td>
-                    </tr>
-                `;
-            });
-
-            html += `
-                        </tbody>
-                    </table>
-                </body>
-                </html>
-            `;
-
-            // Crear y descargar el archivo
-            const blob = new Blob([html], { type: 'application/vnd.ms-excel;charset=utf-8' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
+            // Crear libro de Excel
+            const wb = XLSX.utils.book_new();
             
+            // Crear hoja con los datos
+            const ws = XLSX.utils.json_to_sheet(todosLosDatos);
+
+            // Aplicar autofiltro
+            const range = XLSX.utils.decode_range(ws['!ref']);
+            ws['!autofilter'] = { ref: XLSX.utils.encode_range(range) };
+
+            // Ajustar ancho de columnas
+            ws['!cols'] = [
+                { wch: 12 },  // RUTA
+                { wch: 12 },  // SKU
+                { wch: 10 },  // CANTIDAD
+                { wch: 10 },  // PROMO
+                { wch: 30 },  // PRODUCTO
+                { wch: 12 },  // FECHA
+                { wch: 10 }   // HORA
+            ];
+
+            // Agregar la hoja al libro
+            XLSX.utils.book_append_sheet(wb, ws, "Pedidos");
+
+            // Crear hoja de botones/índice de rutas
+            const indiceRutas = rutasUnicas.map(ruta => {
+                const totalCajas = todosLosDatos
+                    .filter(p => p.RUTA === ruta)
+                    .reduce((sum, p) => sum + p.CANTIDAD, 0);
+                return {
+                    RUTA: ruta,
+                    'TOTAL CAJAS': totalCajas,
+                    INSTRUCCION: `Filtrar por: ${ruta}`
+                };
+            });
+
+            const wsIndice = XLSX.utils.json_to_sheet(indiceRutas);
+            wsIndice['!cols'] = [
+                { wch: 15 },  // RUTA
+                { wch: 15 },  // TOTAL CAJAS
+                { wch: 30 }   // INSTRUCCION
+            ];
+            XLSX.utils.book_append_sheet(wb, wsIndice, "Índice de Rutas");
+
+            // Descargar archivo
             const rutaTexto = filtroRuta || 'TODAS';
             const fecha = new Date().toISOString().split('T')[0];
-            link.download = `Pedidos_${rutaTexto}_${fecha}.xls`;
+            const nombreArchivo = `Pedidos_${rutaTexto}_${fecha}.xlsx`;
             
-            link.click();
-            URL.revokeObjectURL(url);
+            XLSX.writeFile(wb, nombreArchivo);
         }
 
         function exportarSAP() {

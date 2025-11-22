@@ -469,24 +469,64 @@
             // Agregar la hoja al libro
             XLSX.utils.book_append_sheet(wb, ws, "Pedidos");
 
-            // Crear hoja de botones/índice de rutas
-            const indiceRutas = rutasUnicas.map(ruta => {
+            // Crear hoja de índice con códigos SAP y resumen
+            const codigosSAP = [
+                { RUTA: 'SG1903', 'CÓDIGO ALIADO': '1280006985' },
+                { RUTA: 'SG1904', 'CÓDIGO ALIADO': '1280005428' },
+                { RUTA: 'SG1905', 'CÓDIGO ALIADO': '1270002365' },
+                { RUTA: 'SG1006', 'CÓDIGO ALIADO': '1280008102' },
+                { RUTA: 'SG1907', 'CÓDIGO ALIADO': '1263702601' },
+                { RUTA: 'SG1908', 'CÓDIGO ALIADO': '1270004591' }
+            ];
+
+            // Crear resumen de rutas con total de cajas
+            const resumenRutas = rutasUnicas.map(ruta => {
                 const totalCajas = todosLosDatos
                     .filter(p => p.RUTA === ruta)
                     .reduce((sum, p) => sum + p.CANTIDAD, 0);
                 return {
                     RUTA: ruta,
-                    'TOTAL CAJAS': totalCajas,
-                    INSTRUCCION: `Filtrar por: ${ruta}`
+                    'TOTAL CAJAS': totalCajas
                 };
             });
 
-            const wsIndice = XLSX.utils.json_to_sheet(indiceRutas);
+            // Crear la hoja combinando ambas tablas
+            const wsIndice = XLSX.utils.aoa_to_sheet([
+                ['CÓDIGOS SAP DE ALIADOS', '', '', 'RESUMEN DEL DÍA'],
+                [],
+                ['RUTA', 'CÓDIGO ALIADO', '', 'RUTA', 'TOTAL CAJAS']
+            ]);
+
+            // Agregar códigos SAP (siempre todos)
+            codigosSAP.forEach((codigo, index) => {
+                XLSX.utils.sheet_add_aoa(wsIndice, [
+                    [codigo.RUTA, codigo['CÓDIGO ALIADO']]
+                ], { origin: `A${4 + index}` });
+            });
+
+            // Agregar resumen de rutas (solo las del día)
+            resumenRutas.forEach((resumen, index) => {
+                XLSX.utils.sheet_add_aoa(wsIndice, [
+                    [resumen.RUTA, resumen['TOTAL CAJAS']]
+                ], { origin: `D${4 + index}` });
+            });
+
+            // Ajustar ancho de columnas
             wsIndice['!cols'] = [
-                { wch: 15 },  // RUTA
-                { wch: 15 },  // TOTAL CAJAS
-                { wch: 30 }   // INSTRUCCION
+                { wch: 12 },  // RUTA (códigos SAP)
+                { wch: 15 },  // CÓDIGO ALIADO
+                { wch: 3 },   // Espacio
+                { wch: 12 },  // RUTA (resumen)
+                { wch: 15 }   // TOTAL CAJAS
             ];
+
+            // Aplicar estilos a los encabezados
+            const headerStyle = {
+                font: { bold: true, color: { rgb: "FFFFFF" } },
+                fill: { fgColor: { rgb: "F40009" } },
+                alignment: { horizontal: "center", vertical: "center" }
+            };
+
             XLSX.utils.book_append_sheet(wb, wsIndice, "Índice de Rutas");
 
             // Descargar archivo

@@ -94,9 +94,19 @@
             gap: 8px;
             align-items: center;
         }
+        .producto-item input[type="text"],
         .producto-item input[type="number"] {
             width: 80px;
             text-align: center;
+            padding: 8px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .producto-item input[type="text"]:focus,
+        .producto-item input[type="number"]:focus {
+            outline: none;
+            border-color: #f40009;
         }
         .promo-checkbox {
             display: flex;
@@ -521,11 +531,9 @@
                     <div class="producto-inputs">
                         <input type="text" 
                                inputmode="decimal"
-                               pattern="[0-9]*[,.]?[0-9]*"
                                value="${cantidades[prod.sku] ? String(cantidades[prod.sku]).replace('.', ',') : ''}" 
                                placeholder="0"
-                               onchange="actualizarCantidad('${prod.sku}', this.value)"
-                               style="width: 80px; text-align: center;">
+                               onchange="actualizarCantidad('${prod.sku}', this.value)">
                         ${mostrarPromo ? `
                             <div class="promo-checkbox">
                                 <input type="checkbox" 

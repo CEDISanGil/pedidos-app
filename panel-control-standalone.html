@@ -382,8 +382,11 @@
 
             const rutasUnicas = [...new Set(pedidosAgrupados.map(p => p.ruta))];
 
+            // Formatear con 1 decimal si es necesario y usar coma
+            const totalFormateado = (totalCajas % 1 === 0 ? totalCajas : totalCajas.toFixed(1)).toString().replace('.', ',');
+
             document.getElementById('totalPedidos').textContent = pedidosFiltrados.length;
-            document.getElementById('totalCajas').textContent = totalCajas;
+            document.getElementById('totalCajas').textContent = totalFormateado;
             document.getElementById('rutasActivas').textContent = rutasUnicas.length;
         }
 
@@ -419,6 +422,7 @@
 
             lista.innerHTML = pedidosFiltrados.map(pedido => {
                 const total = pedido.productos.reduce((sum, p) => sum + p.cantidad, 0);
+                const totalFormateado = (total % 1 === 0 ? total : total.toFixed(1)).toString().replace('.', ',');
                 return `
                     <div class="pedido-card">
                         <div class="pedido-header">
@@ -426,19 +430,22 @@
                                 <div class="pedido-ruta">${pedido.ruta}</div>
                                 <div class="pedido-fecha">${pedido.fecha} - ${pedido.hora}</div>
                             </div>
-                            <div class="pedido-total">${total} cajas</div>
+                            <div class="pedido-total">${totalFormateado} cajas</div>
                         </div>
                         <div class="productos-list">
-                            ${pedido.productos.map(prod => `
+                            ${pedido.productos.map(prod => {
+                                const cantidadFormateada = prod.cantidad.toString().replace('.', ',');
+                                return `
                                 <div class="producto-item">
                                     <div>
                                         <div class="producto-nombre">${prod.nombre}</div>
                                         <div class="producto-sku">SKU: ${prod.sku}</div>
                                         ${prod.promo !== 'N/A' ? `<div class="producto-promo">% Promo: ${prod.promo}</div>` : ''}
                                     </div>
-                                    <div class="producto-cantidad">${prod.cantidad}</div>
+                                    <div class="producto-cantidad">${cantidadFormateada}</div>
                                 </div>
-                            `).join('')}
+                                `;
+                            }).join('')}
                         </div>
                     </div>
                 `;

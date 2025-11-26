@@ -265,8 +265,8 @@
         </div>
     </div>
 
-    <!-- Librería SheetJS para exportar Excel real -->
-    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <!-- Librería ExcelJS para exportar Excel con estilos -->
+    <script src="https://cdn.jsdelivr.net/npm/exceljs@4.3.0/dist/exceljs.min.js"></script>
 
     <script>
         const SUPABASE_URL = 'https://etxtmdljkxdaonyldcmn.supabase.co';
@@ -452,7 +452,7 @@
             }).join('');
         }
 
-        function exportarExcel() {
+        async function exportarExcel() {
             const filtroRuta = document.getElementById('filtroRuta').value;
             const pedidosFiltrados = filtroRuta 
                 ? pedidosAgrupados.filter(p => p.ruta === filtroRuta)
@@ -469,15 +469,15 @@
 
             pedidosFiltrados.forEach(pedido => {
                 pedido.productos.forEach(prod => {
-                    const fila = {
-                        RUTA: pedido.ruta,
-                        SKU: prod.sku,
-                        CANTIDAD: prod.cantidad,
-                        PROMO: prod.promo,
-                        PRODUCTO: prod.nombre,
-                        FECHA: pedido.fecha,
-                        HORA: pedido.hora
-                    };
+                    const fila = [
+                        pedido.ruta,
+                        prod.sku,
+                        prod.cantidad,
+                        prod.promo,
+                        prod.nombre,
+                        pedido.fecha,
+                        pedido.hora
+                    ];
 
                     if (prod.promo === 'N/A' || !prod.promo) {
                         productosNormales.push(fila);
@@ -489,145 +489,157 @@
 
             // Combinar productos normales primero, luego promociones
             const todosLosDatos = [...productosNormales, ...productosConPromo];
+            const rutasUnicas = [...new Set(todosLosDatos.map(p => p[0]))].sort();
 
-            // Obtener rutas únicas para los botones
-            const rutasUnicas = [...new Set(todosLosDatos.map(p => p.RUTA))].sort();
-
-            // Crear libro de Excel
-            const wb = XLSX.utils.book_new();
+            // Crear libro con ExcelJS
+            const workbook = new ExcelJS.Workbook();
             
-            // Crear hoja con los datos
-            const ws = XLSX.utils.json_to_sheet(todosLosDatos);
+            // ===== HOJA 1: PEDIDOS =====
+            const wsPedidos = workbook.addWorksheet('Pedidos');
 
-            // Aplicar autofiltro
-            const range = XLSX.utils.decode_range(ws['!ref']);
-            ws['!autofilter'] = { ref: XLSX.utils.encode_range(range) };
+            // Agregar encabezados
+            wsPedidos.columns = [
+                { header: 'RUTA', key: 'ruta', width: 12 },
+                { header: 'SKU', key: 'sku', width: 12 },
+                { header: 'CANTIDAD', key: 'cantidad', width: 10 },
+                { header: 'PROMO', key: 'promo', width: 10 },
+                { header: 'PRODUCTO', key: 'producto', width: 35 },
+                { header: 'FECHA', key: 'fecha', width: 12 },
+                { header: 'HORA', key: 'hora', width: 10 }
+            ];
 
-            // ===== APLICAR COLORES ALTERNADOS CADA 8 FILAS =====
-            for (let R = range.s.r + 1; R <= range.e.r; ++R) {
-                // Determinar el grupo de 8 filas (0-7, 8-15, 16-23, etc.)
-                const grupoDeOcho = Math.floor((R - 1) / 8);
+            // Estilo de encabezado (Rojo Coca-Cola)
+            wsPedidos.getRow(1).eachCell((cell) => {
+                cell.fill = {
+                    type: 'pattern',
+                    pattern: 'solid',
+                    fgColor: { argb: 'FFF40009' }
+                };
+                cell.font = {
+                    bold: true,
+                    color: { argb: 'FFFFFFFF' }
+                };
+                cell.alignment = { horizontal: 'center', vertical: 'middle' };
+            });
+
+            // Agregar datos y aplicar colores cada 8 filas
+            todosLosDatos.forEach((fila, index) => {
+                const row = wsPedidos.addRow(fila);
+                
+                // Determinar el grupo de 8 filas
+                const grupoDeOcho = Math.floor(index / 8);
                 const esGrupoImpar = grupoDeOcho % 2 === 1;
                 
-                // Aplicar color a todas las celdas de la fila
-                for (let C = range.s.c; C <= range.e.c; ++C) {
-                    const cell_address = XLSX.utils.encode_cell({r: R, c: C});
-                    if (!ws[cell_address]) continue;
-                    
-                    // Inicializar el estilo de la celda si no existe
-                    if (!ws[cell_address].s) ws[cell_address].s = {};
-                    
-                    // Aplicar color de fondo cada 8 filas
-                    if (esGrupoImpar) {
-                        ws[cell_address].s.fill = {
-                            patternType: "solid",
-                            fgColor: { rgb: "D9EAD3" } // Verde claro
+                // Aplicar color verde claro a grupos impares
+                if (esGrupoImpar) {
+                    row.eachCell((cell) => {
+                        cell.fill = {
+                            type: 'pattern',
+                            pattern: 'solid',
+                            fgColor: { argb: 'FFD9EAD3' } // Verde claro
                         };
-                    }
+                    });
                 }
-            }
-
-            // Aplicar estilo a los encabezados
-            for (let C = range.s.c; C <= range.e.c; ++C) {
-                const cell_address = XLSX.utils.encode_cell({r: 0, c: C});
-                if (!ws[cell_address]) continue;
-                
-                ws[cell_address].s = {
-                    fill: {
-                        patternType: "solid",
-                        fgColor: { rgb: "F40009" }
-                    },
-                    font: {
-                        bold: true,
-                        color: { rgb: "FFFFFF" }
-                    },
-                    alignment: {
-                        horizontal: "center",
-                        vertical: "center"
-                    }
-                };
-            }
-
-            // Ajustar ancho de columnas
-            ws['!cols'] = [
-                { wch: 12 },  // RUTA
-                { wch: 12 },  // SKU
-                { wch: 10 },  // CANTIDAD
-                { wch: 10 },  // PROMO
-                { wch: 30 },  // PRODUCTO
-                { wch: 12 },  // FECHA
-                { wch: 10 }   // HORA
-            ];
-
-            // Agregar la hoja al libro
-            XLSX.utils.book_append_sheet(wb, ws, "Pedidos");
-
-            // Crear hoja de índice con códigos SAP y resumen
-            const codigosSAP = [
-                { RUTA: 'SG1903', 'CÓDIGO ALIADO': '1280006985' },
-                { RUTA: 'SG1904', 'CÓDIGO ALIADO': '1280005428' },
-                { RUTA: 'SG1905', 'CÓDIGO ALIADO': '1270002365' },
-                { RUTA: 'SG10o6', 'CÓDIGO ALIADO': '1280008102' },
-                { RUTA: 'SG1907', 'CÓDIGO ALIADO': '1263702601' },
-                { RUTA: 'SG1908', 'CÓDIGO ALIADO': '1270004591' }
-            ];
-
-            // Crear resumen de rutas con total de cajas
-            const resumenRutas = rutasUnicas.map(ruta => {
-                const totalCajas = todosLosDatos
-                    .filter(p => p.RUTA === ruta)
-                    .reduce((sum, p) => sum + p.CANTIDAD, 0);
-                return {
-                    RUTA: ruta,
-                    'TOTAL CAJAS': totalCajas
-                };
             });
 
-            // Crear la hoja combinando ambas tablas
-            const wsIndice = XLSX.utils.aoa_to_sheet([
-                ['CÓDIGOS SAP DE ALIADOS', '', '', 'RESUMEN DEL DÍA'],
-                [],
-                ['RUTA', 'CÓDIGO ALIADO', '', 'RUTA', 'TOTAL CAJAS']
-            ]);
-
-            // Agregar códigos SAP (siempre todos)
-            codigosSAP.forEach((codigo, index) => {
-                XLSX.utils.sheet_add_aoa(wsIndice, [
-                    [codigo.RUTA, codigo['CÓDIGO ALIADO']]
-                ], { origin: `A${4 + index}` });
-            });
-
-            // Agregar resumen de rutas (solo las del día)
-            resumenRutas.forEach((resumen, index) => {
-                XLSX.utils.sheet_add_aoa(wsIndice, [
-                    [resumen.RUTA, resumen['TOTAL CAJAS']]
-                ], { origin: `D${4 + index}` });
-            });
-
-            // Ajustar ancho de columnas
-            wsIndice['!cols'] = [
-                { wch: 12 },  // RUTA (códigos SAP)
-                { wch: 15 },  // CÓDIGO ALIADO
-                { wch: 3 },   // Espacio
-                { wch: 12 },  // RUTA (resumen)
-                { wch: 15 }   // TOTAL CAJAS
-            ];
-
-            // Aplicar estilos a los encabezados
-            const headerStyle = {
-                font: { bold: true, color: { rgb: "FFFFFF" } },
-                fill: { fgColor: { rgb: "F40009" } },
-                alignment: { horizontal: "center", vertical: "center" }
+            // Aplicar filtros automáticos
+            wsPedidos.autoFilter = {
+                from: 'A1',
+                to: 'G1'
             };
 
-            XLSX.utils.book_append_sheet(wb, wsIndice, "Índice de Rutas");
+            // ===== HOJA 2: ÍNDICE DE RUTAS =====
+            const wsIndice = workbook.addWorksheet('Índice de Rutas');
+
+            // Títulos principales
+            wsIndice.mergeCells('A1:B1');
+            wsIndice.getCell('A1').value = 'CÓDIGOS SAP DE ALIADOS';
+            wsIndice.getCell('A1').font = { bold: true, size: 14, color: { argb: 'FFF40009' } };
+
+            wsIndice.mergeCells('D1:E1');
+            wsIndice.getCell('D1').value = 'RESUMEN DEL DÍA';
+            wsIndice.getCell('D1').font = { bold: true, size: 14, color: { argb: 'FFF40009' } };
+
+            // Encabezados de códigos SAP
+            wsIndice.getCell('A3').value = 'RUTA';
+            wsIndice.getCell('B3').value = 'CÓDIGO ALIADO';
+            wsIndice.getRow(3).eachCell((cell, colNumber) => {
+                if (colNumber <= 2) {
+                    cell.fill = {
+                        type: 'pattern',
+                        pattern: 'solid',
+                        fgColor: { argb: 'FFF40009' }
+                    };
+                    cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+                    cell.alignment = { horizontal: 'center', vertical: 'middle' };
+                }
+            });
+
+            // Datos de códigos SAP
+            const codigosSAP = [
+                ['SG1903', '1280006985'],
+                ['SG1904', '1280005428'],
+                ['SG1905', '1270002365'],
+                ['SG10o6', '1280008102'],
+                ['SG1907', '1263702601'],
+                ['SG1908', '1270004591']
+            ];
+
+            codigosSAP.forEach((codigo, index) => {
+                const row = wsIndice.getRow(4 + index);
+                row.getCell(1).value = codigo[0];
+                row.getCell(2).value = codigo[1];
+                row.getCell(1).alignment = { horizontal: 'center' };
+                row.getCell(2).alignment = { horizontal: 'center' };
+            });
+
+            // Encabezados de resumen
+            wsIndice.getCell('D3').value = 'RUTA';
+            wsIndice.getCell('E3').value = 'TOTAL CAJAS';
+            ['D3', 'E3'].forEach(addr => {
+                const cell = wsIndice.getCell(addr);
+                cell.fill = {
+                    type: 'pattern',
+                    pattern: 'solid',
+                    fgColor: { argb: 'FFF40009' }
+                };
+                cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+                cell.alignment = { horizontal: 'center', vertical: 'middle' };
+            });
+
+            // Datos de resumen
+            rutasUnicas.forEach((ruta, index) => {
+                const totalCajas = todosLosDatos
+                    .filter(p => p[0] === ruta)
+                    .reduce((sum, p) => sum + p[2], 0);
+                
+                const row = wsIndice.getRow(4 + index);
+                row.getCell(4).value = ruta;
+                row.getCell(5).value = totalCajas;
+                row.getCell(4).alignment = { horizontal: 'center' };
+                row.getCell(5).alignment = { horizontal: 'center' };
+            });
+
+            // Ajustar anchos de columna
+            wsIndice.getColumn(1).width = 12;
+            wsIndice.getColumn(2).width = 15;
+            wsIndice.getColumn(3).width = 3;
+            wsIndice.getColumn(4).width = 12;
+            wsIndice.getColumn(5).width = 15;
 
             // Descargar archivo
             const rutaTexto = filtroRuta || 'TODAS';
             const fecha = new Date().toISOString().split('T')[0];
             const nombreArchivo = `Pedidos_${rutaTexto}_${fecha}.xlsx`;
             
-            XLSX.writeFile(wb, nombreArchivo);
+            const buffer = await workbook.xlsx.writeBuffer();
+            const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = nombreArchivo;
+            link.click();
+            URL.revokeObjectURL(url);
         }
 
         function exportarSAP() {

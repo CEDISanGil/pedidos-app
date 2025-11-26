@@ -503,6 +503,51 @@
             const range = XLSX.utils.decode_range(ws['!ref']);
             ws['!autofilter'] = { ref: XLSX.utils.encode_range(range) };
 
+            // ===== APLICAR COLORES ALTERNADOS CADA 8 FILAS =====
+            for (let R = range.s.r + 1; R <= range.e.r; ++R) {
+                // Determinar el grupo de 8 filas (0-7, 8-15, 16-23, etc.)
+                const grupoDeOcho = Math.floor((R - 1) / 8);
+                const esGrupoImpar = grupoDeOcho % 2 === 1;
+                
+                // Aplicar color a todas las celdas de la fila
+                for (let C = range.s.c; C <= range.e.c; ++C) {
+                    const cell_address = XLSX.utils.encode_cell({r: R, c: C});
+                    if (!ws[cell_address]) continue;
+                    
+                    // Inicializar el estilo de la celda si no existe
+                    if (!ws[cell_address].s) ws[cell_address].s = {};
+                    
+                    // Aplicar color de fondo cada 8 filas
+                    if (esGrupoImpar) {
+                        ws[cell_address].s.fill = {
+                            patternType: "solid",
+                            fgColor: { rgb: "D9EAD3" } // Verde claro
+                        };
+                    }
+                }
+            }
+
+            // Aplicar estilo a los encabezados
+            for (let C = range.s.c; C <= range.e.c; ++C) {
+                const cell_address = XLSX.utils.encode_cell({r: 0, c: C});
+                if (!ws[cell_address]) continue;
+                
+                ws[cell_address].s = {
+                    fill: {
+                        patternType: "solid",
+                        fgColor: { rgb: "F40009" }
+                    },
+                    font: {
+                        bold: true,
+                        color: { rgb: "FFFFFF" }
+                    },
+                    alignment: {
+                        horizontal: "center",
+                        vertical: "center"
+                    }
+                };
+            }
+
             // Ajustar ancho de columnas
             ws['!cols'] = [
                 { wch: 12 },  // RUTA

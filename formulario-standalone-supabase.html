@@ -257,6 +257,9 @@
             
             <div class="form-group">
                 <label>Productos (Ingrese cantidades en cajas)</label>
+                <div style="background: #fff3cd; border: 1px solid #ffc107; padding: 10px; border-radius: 8px; margin-bottom: 10px; font-size: 12px;">
+                    💡 <strong>Nota:</strong> Puede usar decimales con coma. Ejemplo: 0,5 = 5 unidades, 0,6 = 6 unidades, 2,3 = 2 cajas + 3 unidades
+                </div>
                 <div class="productos-lista" id="productosLista"></div>
             </div>
             
@@ -516,11 +519,13 @@
                         <div class="producto-sku">SKU: ${prod.sku}</div>
                     </div>
                     <div class="producto-inputs">
-                        <input type="number" 
-                               min="0" 
-                               value="${cantidades[prod.sku] || ''}" 
+                        <input type="text" 
+                               inputmode="decimal"
+                               pattern="[0-9]*[,.]?[0-9]*"
+                               value="${cantidades[prod.sku] ? String(cantidades[prod.sku]).replace('.', ',') : ''}" 
                                placeholder="0"
-                               onchange="actualizarCantidad('${prod.sku}', this.value)">
+                               onchange="actualizarCantidad('${prod.sku}', this.value)"
+                               style="width: 80px; text-align: center;">
                         ${mostrarPromo ? `
                             <div class="promo-checkbox">
                                 <input type="checkbox" 
@@ -537,7 +542,10 @@
         }
         
         function actualizarCantidad(sku, valor) {
-            const cantidad = parseInt(valor) || 0;
+            // Convertir coma a punto para procesamiento interno
+            const valorNormalizado = valor.replace(',', '.');
+            const cantidad = parseFloat(valorNormalizado) || 0;
+            
             if (cantidad > 0) {
                 cantidades[sku] = cantidad;
             } else {

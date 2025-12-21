@@ -362,7 +362,9 @@
                     sku: item.sku,
                     nombre: item.producto,
                     cantidad: item.cantidad,
-                    promo: item.promo ? 'Sí' : 'N/A'
+                    promo: item.promo ? 'Sí' : 'N/A',
+                    esEspecial: item.es_especial || false,
+                    codigoCliente: item.codigo_cliente || null
                 });
             });
 
@@ -466,23 +468,36 @@
             // Crear arrays separados para productos normales y promociones
             const productosNormales = [];
             const productosConPromo = [];
+            const productosEspeciales = []; // NUEVO: Array para pedidos especiales
 
             pedidosFiltrados.forEach(pedido => {
                 pedido.productos.forEach(prod => {
-                    const fila = [
-                        pedido.ruta,
-                        prod.sku,
-                        prod.cantidad,
-                        prod.promo,
-                        prod.nombre,
-                        pedido.fecha,
-                        pedido.hora
-                    ];
-
-                    if (prod.promo === 'N/A' || !prod.promo) {
-                        productosNormales.push(fila);
+                    // Si es pedido especial, va a su propia hoja
+                    if (prod.esEspecial && prod.codigoCliente) {
+                        productosEspeciales.push([
+                            pedido.ruta,
+                            prod.codigoCliente,
+                            prod.sku,
+                            prod.cantidad,
+                            prod.nombre
+                        ]);
                     } else {
-                        productosConPromo.push(fila);
+                        // Lógica normal para pedidos regulares
+                        const fila = [
+                            pedido.ruta,
+                            prod.sku,
+                            prod.cantidad,
+                            prod.promo,
+                            prod.nombre,
+                            pedido.fecha,
+                            pedido.hora
+                        ];
+
+                        if (prod.promo === 'N/A' || !prod.promo) {
+                            productosNormales.push(fila);
+                        } else {
+                            productosConPromo.push(fila);
+                        }
                     }
                 });
             });
@@ -626,6 +641,45 @@
             wsIndice.getColumn(3).width = 3;
             wsIndice.getColumn(4).width = 12;
             wsIndice.getColumn(5).width = 15;
+
+            // ===== HOJA 3: PEDIDOS ESPECIALES (Otra transacción SAP) =====
+            if (productosEspeciales.length > 0) {
+                const wsEspeciales = workbook.addWorksheet('Pedidos Especiales');
+
+                // Agregar encabezados
+                wsEspeciales.columns = [
+                    { header: 'RUTA', key: 'ruta', width: 12 },
+                    { header: 'CÓDIGO CLIENTE', key: 'cliente', width: 15 },
+                    { header: 'SKU', key: 'sku', width: 12 },
+                    { header: 'CANTIDAD', key: 'cantidad', width: 10 },
+                    { header: 'PRODUCTO', key: 'producto', width: 35 }
+                ];
+
+                // Estilo de encabezado (Naranja para diferenciar)
+                wsEspeciales.getRow(1).eachCell((cell) => {
+                    cell.fill = {
+                        type: 'pattern',
+                        pattern: 'solid',
+                        fgColor: { argb: 'FFF59E0B' } // Naranja
+                    };
+                    cell.font = {
+                        bold: true,
+                        color: { argb: 'FFFFFFFF' }
+                    };
+                    cell.alignment = { horizontal: 'center', vertical: 'middle' };
+                });
+
+                // Agregar datos
+                productosEspeciales.forEach((fila) => {
+                    wsEspeciales.addRow(fila);
+                });
+
+                // Aplicar filtros automáticos
+                wsEspeciales.autoFilter = {
+                    from: 'A1',
+                    to: 'E1'
+                };
+            }
 
             // Descargar archivo
             const rutaTexto = filtroRuta || 'TODAS';

@@ -242,6 +242,25 @@
             font-weight: 600;
             font-size: 14px;
         }
+        .btn-eliminar-pedido {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .btn-eliminar-pedido:hover {
+            background: #dc2626;
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
+        }
+        .btn-eliminar-pedido:active {
+            transform: scale(0.95);
+        }
     </style>
 </head>
 <body>
@@ -252,7 +271,7 @@
                     <h1>📊 Panel de Control Pedidos San Gil</h1>
                     <p>Consolidador de Pedidos en Tiempo Real</p>
                 </div>
-                <img src="https://cedisangil.github.io/pedidos-app/Logo_Coca_cola.jpg" alt="Coca-Cola" class="logo">
+                <img src="https://cedisangil.github.io/pedidos-app/logo.jpg" alt="Coca-Cola" class="logo">
             </div>
             
             <div class="stats">
@@ -362,6 +381,43 @@
                 }
             } catch (error) {
                 console.error('Error al verificar pedidos antiguos:', error);
+            }
+        }
+
+        async function eliminarPedido(ruta, fecha, hora) {
+            const confirmacion = confirm(
+                `¿Está seguro de eliminar el pedido de la ruta ${ruta}?\n\n` +
+                `Fecha: ${fecha}\n` +
+                `Hora: ${hora}\n\n` +
+                `Esta acción no se puede deshacer.`
+            );
+
+            if (!confirmacion) return;
+
+            try {
+                // Eliminar de Supabase usando los tres parámetros
+                const response = await fetch(
+                    `${SUPABASE_URL}/rest/v1/pedidos?ruta=eq.${encodeURIComponent(ruta)}&fecha=eq.${encodeURIComponent(fecha)}&hora=eq.${encodeURIComponent(hora)}`,
+                    {
+                        method: 'DELETE',
+                        headers: {
+                            'apikey': SUPABASE_KEY,
+                            'Authorization': `Bearer ${SUPABASE_KEY}`
+                        }
+                    }
+                );
+
+                if (!response.ok) {
+                    throw new Error('Error al eliminar el pedido');
+                }
+
+                // Recargar pedidos
+                await cargarPedidos();
+                alert('✅ Pedido eliminado correctamente');
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Error al eliminar el pedido. Por favor intente nuevamente.');
             }
         }
 
@@ -519,7 +575,12 @@
                                 <div class="pedido-ruta">${pedido.ruta}</div>
                                 <div class="pedido-fecha">${pedido.fecha} - ${pedido.hora}</div>
                             </div>
-                            <div class="pedido-total">${totalFormateado} cajas</div>
+                            <div style="display: flex; align-items: center; gap: 15px;">
+                                <div class="pedido-total">${totalFormateado} cajas</div>
+                                <button class="btn-eliminar-pedido" onclick="eliminarPedido('${pedido.ruta}', '${pedido.fecha}', '${pedido.hora}')" title="Eliminar este pedido">
+                                    🗑️
+                                </button>
+                            </div>
                         </div>
                         <div class="productos-list">
                             ${pedido.productos.map(prod => {

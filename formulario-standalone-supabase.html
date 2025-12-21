@@ -347,7 +347,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <img src="https://cedisangil.github.io/pedidos-app/OIP%20(1).jpg" alt="Coca-Cola" class="logo">
+            <img src="https://cedisangil.github.io/pedidos-app/nuevo-logo.png" alt="Coca-Cola" class="logo">
             <h1>📦 Pedido de Productos</h1>
             <p>Complete su pedido diario</p>
         </div>
@@ -641,8 +641,28 @@
                 delete cliente.cantidades[sku];
             }
             
-            renderClientesEspeciales();
+            // Solo actualizar totales, NO re-renderizar todo
             actualizarTotalesEspeciales();
+            actualizarStatsCliente(clienteId);
+        }
+
+        function actualizarStatsCliente(clienteId) {
+            const cliente = clientesEspeciales.find(c => c.id === clienteId);
+            if (!cliente) return;
+
+            // Buscar el elemento de stats de este cliente
+            const cards = document.querySelectorAll('.cliente-card');
+            const clienteIndex = clientesEspeciales.findIndex(c => c.id === clienteId);
+            if (clienteIndex === -1 || !cards[clienteIndex]) return;
+
+            const statsDiv = cards[clienteIndex].querySelector('.cliente-stats');
+            if (!statsDiv) return;
+
+            const totalCajas = Object.values(cliente.cantidades).reduce((sum, cant) => sum + cant, 0);
+            const totalFormateado = totalCajas % 1 === 0 ? totalCajas : totalCajas.toFixed(1).replace('.', ',');
+            const numProductos = Object.keys(cliente.cantidades).length;
+
+            statsDiv.innerHTML = `📦 ${numProductos} producto(s) | Total: ${totalFormateado} cajas`;
         }
 
         function renderClientesEspeciales() {

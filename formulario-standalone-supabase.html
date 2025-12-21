@@ -208,6 +208,143 @@
         .button-group .btn {
             flex: 1;
         }
+        
+        /* Estilos para sección de pedidos especiales */
+        .seccion-especial {
+            margin-top: 25px;
+            border: 2px solid #f59e0b;
+            border-radius: 12px;
+            overflow: hidden;
+            background: white;
+        }
+        .seccion-especial-header {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            color: white;
+            padding: 15px 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: background 0.3s;
+            user-select: none;
+        }
+        .seccion-especial-header:hover {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        }
+        .seccion-especial-header h3 {
+            margin: 0;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .seccion-especial-icon {
+            font-size: 20px;
+            transition: transform 0.3s;
+        }
+        .seccion-especial-icon.abierto {
+            transform: rotate(180deg);
+        }
+        .seccion-especial-contenido {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            background: #fffbeb;
+        }
+        .seccion-especial-contenido.abierto {
+            max-height: 5000px;
+            transition: max-height 0.5s ease-in;
+        }
+        .seccion-especial-body {
+            padding: 20px;
+        }
+        .campo-cliente {
+            background: white;
+            border: 2px solid #f59e0b;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .campo-cliente label {
+            color: #92400e;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: block;
+        }
+        .campo-cliente input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #fbbf24;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+        .campo-cliente input:focus {
+            outline: none;
+            border-color: #f59e0b;
+        }
+        .alerta-especial {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 13px;
+            color: #92400e;
+        }
+        .total-badge-especial {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 16px;
+            margin-top: 15px;
+            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+        }
+        .cliente-card {
+            background: white;
+            border: 2px solid #f59e0b;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);
+        }
+        .cliente-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #fef3c7;
+        }
+        .cliente-card-title {
+            font-weight: 600;
+            color: #92400e;
+            font-size: 16px;
+        }
+        .btn-eliminar-cliente {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        .btn-eliminar-cliente:hover {
+            background: #dc2626;
+        }
+        .cliente-stats {
+            background: #fef3c7;
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 10px;
+            text-align: center;
+            font-weight: 600;
+            color: #92400e;
+        }
     </style>
 </head>
 <body>
@@ -260,13 +397,14 @@
                 <strong>⚠️ ATENCIÓN:</strong> Esta ruta maneja promociones. Marque el checkbox "PROMO" en los productos que apliquen.
             </div>
             
+            <!-- SECCIÓN: PEDIDO NORMAL -->
             <div class="form-group">
                 <label>Buscar Producto</label>
                 <input type="text" id="buscar" class="search-box" placeholder="🔍 Buscar por nombre o SKU...">
             </div>
             
             <div class="form-group">
-                <label>Productos (Ingrese cantidades en cajas)</label>
+                <label>Productos - Pedido Normal (Ingrese cantidades en cajas)</label>
                 <div style="background: #fff3cd; border: 1px solid #ffc107; padding: 10px; border-radius: 8px; margin-bottom: 10px; font-size: 12px;">
                     💡 <strong>Nota:</strong> Puede usar decimales con coma. Ejemplo: 0,5 = 5 unidades, 0,6 = 6 unidades, 2,3 = 2 cajas + 3 unidades
                 </div>
@@ -274,11 +412,42 @@
             </div>
             
             <div id="totalBadge" class="total-badge hidden">
-                Total Cajas: <span id="totalCajas">0</span>
+                Total Cajas Pedido Normal: <span id="totalCajas">0</span>
+            </div>
+
+            <!-- SECCIÓN: PEDIDOS ESPECIALES (Múltiples clientes) -->
+            <div class="seccion-especial">
+                <div class="seccion-especial-header" onclick="toggleSeccionEspecial()">
+                    <h3>
+                        <span>💳</span>
+                        <span>Agregar Pedidos a Crédito / Especiales</span>
+                    </h3>
+                    <span class="seccion-especial-icon" id="iconoEspecial">▼</span>
+                </div>
+                <div class="seccion-especial-contenido" id="contenidoEspecial">
+                    <div class="seccion-especial-body">
+                        <div class="alerta-especial">
+                            ⚠️ <strong>Importante:</strong> Puede agregar múltiples clientes. Cada cliente tendrá su propio listado de productos especiales.
+                        </div>
+
+                        <!-- Lista de clientes especiales agregados -->
+                        <div id="listaClientesEspeciales"></div>
+
+                        <!-- Botón para agregar nuevo cliente -->
+                        <button type="button" class="btn" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); margin-bottom: 20px;" onclick="agregarNuevoCliente()">
+                            ➕ Agregar Cliente Especial
+                        </button>
+
+                        <div id="totalBadgeEspecial" class="total-badge-especial hidden">
+                            Total Clientes Especiales: <span id="totalClientesEspeciales">0</span> | 
+                            Total Cajas: <span id="totalCajasEspeciales">0</span>
+                        </div>
+                    </div>
+                </div>
             </div>
             
             <button class="btn" id="btnEnviar" onclick="enviarPedido()">
-                Enviar Pedido
+                Enviar Pedido Completo
             </button>
         </div>
     </div>
@@ -358,10 +527,13 @@
             { sku: "120117", nombre: "CITRUS 400 ML" },
             { sku: "120184", nombre: "PONCHE 400 ML" },
             { sku: "120158", nombre: "MANDAR. 400 ML" },
-            { sku: "120027", nombre: "MONSTER VIOLET 24 UNID" },
-            { sku: "120181", nombre: "MONSTER MAN LOCO 12 UNID" },
-            { sku: "120182", nombre: "MONSTER PARADISE 12 UNID" },
-            { sku: "120023", nombre: "MONSTER BLUE (ZERO) 24 UNID" },
+            { sku: "120156", nombre: "MONSTER VERDE" },
+            { sku: "120027", nombre: "MONSTER VIOLET" },
+            { sku: "120181", nombre: "MONSTER MAN LOCO" },
+            { sku: "120112", nombre: "MONSTER PARADISE" },
+            { sku: "160378", nombre: "MONSTER ULTRA" },
+            { sku: "120023", nombre: "MONTER BLU" },
+            { sku: "120175", nombre: "MONSTER ROSA" },
             { sku: "135676", nombre: "DUO CC 2.5" },
             { sku: "136247", nombre: "DUO CC + QUATRO" },
             { sku: "92794", nombre: "MARACUYA 600" },
@@ -372,6 +544,7 @@
             { sku: "136627", nombre: "TRDENT 5SYERBA" },
             { sku: "136628", nombre: "TRDENT 5S MORA" },
             { sku: "160200", nombre: "CC 250" },
+            { sku: "135761", nombre: "CC ZERO 250" },
             { sku: "120187", nombre: "CITRUS 250" },
             { sku: "56703", nombre: "QUATRO 250" },
             { sku: "160323", nombre: "KOLA ROMAN 250" },
@@ -420,9 +593,185 @@
         
         let cantidades = {};
         let promos = {};
+        let clientesEspeciales = []; // Array de objetos: { codigo: '123', cantidades: {}, totalCajas: 0 }
         let rutaActual = '';
         let modoEdicion = false;
         
+        function toggleSeccionEspecial() {
+            const contenido = document.getElementById('contenidoEspecial');
+            const icono = document.getElementById('iconoEspecial');
+            
+            contenido.classList.toggle('abierto');
+            icono.classList.toggle('abierto');
+        }
+
+        function agregarNuevoCliente() {
+            const nuevoCliente = {
+                id: Date.now(),
+                codigo: '',
+                cantidades: {}
+            };
+            clientesEspeciales.push(nuevoCliente);
+            renderClientesEspeciales();
+            actualizarTotalesEspeciales();
+        }
+
+        function eliminarCliente(id) {
+            if (confirm('¿Está seguro de eliminar este cliente especial?')) {
+                clientesEspeciales = clientesEspeciales.filter(c => c.id !== id);
+                renderClientesEspeciales();
+                actualizarTotalesEspeciales();
+            }
+        }
+
+        function actualizarCodigoCliente(id, codigo) {
+            const cliente = clientesEspeciales.find(c => c.id === id);
+            if (cliente) {
+                cliente.codigo = codigo;
+            }
+        }
+
+        function actualizarCantidadEspecial(clienteId, sku, valor) {
+            const cliente = clientesEspeciales.find(c => c.id === clienteId);
+            if (!cliente) return;
+
+            const valorNormalizado = valor.replace(',', '.');
+            const cantidad = parseFloat(valorNormalizado) || 0;
+            
+            if (cantidad > 0) {
+                cliente.cantidades[sku] = cantidad;
+            } else {
+                delete cliente.cantidades[sku];
+            }
+            
+            renderClientesEspeciales();
+            actualizarTotalesEspeciales();
+        }
+
+        function renderClientesEspeciales() {
+            const container = document.getElementById('listaClientesEspeciales');
+            
+            if (clientesEspeciales.length === 0) {
+                container.innerHTML = '';
+                return;
+            }
+
+            container.innerHTML = clientesEspeciales.map(cliente => {
+                const totalCajas = Object.values(cliente.cantidades).reduce((sum, cant) => sum + cant, 0);
+                const totalFormateado = totalCajas % 1 === 0 ? totalCajas : totalCajas.toFixed(1).replace('.', ',');
+                const numProductos = Object.keys(cliente.cantidades).length;
+
+                return `
+                    <div class="cliente-card">
+                        <div class="cliente-card-header">
+                            <div class="cliente-card-title">Cliente Especial #${clientesEspeciales.indexOf(cliente) + 1}</div>
+                            <button type="button" class="btn-eliminar-cliente" onclick="eliminarCliente(${cliente.id})">
+                                🗑️ Eliminar
+                            </button>
+                        </div>
+
+                        <div class="campo-cliente">
+                            <label>Código del Cliente *</label>
+                            <input type="text" 
+                                   value="${cliente.codigo}" 
+                                   placeholder="Ejemplo: 122093455"
+                                   onchange="actualizarCodigoCliente(${cliente.id}, this.value)">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Buscar Producto</label>
+                            <input type="text" 
+                                   class="search-box" 
+                                   placeholder="🔍 Buscar por nombre o SKU..."
+                                   oninput="renderProductosCliente(${cliente.id}, this.value)">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Productos (Ingrese cantidades en cajas)</label>
+                            <div class="productos-lista" id="productos_${cliente.id}"></div>
+                        </div>
+
+                        <div class="cliente-stats">
+                            📦 ${numProductos} producto(s) | Total: ${totalFormateado} cajas
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Renderizar productos para cada cliente
+            clientesEspeciales.forEach(cliente => {
+                renderProductosCliente(cliente.id, '');
+            });
+        }
+
+        function renderProductosCliente(clienteId, filtro = '') {
+            const cliente = clientesEspeciales.find(c => c.id === clienteId);
+            if (!cliente) return;
+
+            const lista = document.getElementById(`productos_${clienteId}`);
+            if (!lista) return;
+
+            const productosFiltrados = filtro 
+                ? productos.filter(p => 
+                    p.nombre.toLowerCase().includes(filtro.toLowerCase()) ||
+                    p.sku.includes(filtro)
+                  )
+                : productos;
+
+            lista.innerHTML = '';
+            productosFiltrados.forEach(prod => {
+                const div = document.createElement('div');
+                div.className = 'producto-item';
+                const cantidadActual = cliente.cantidades[prod.sku] || '';
+                const valorMostrar = cantidadActual ? String(cantidadActual).replace('.', ',') : '';
+                
+                div.innerHTML = `
+                    <div class="producto-info">
+                        <div class="producto-nombre">${prod.nombre}</div>
+                        <div class="producto-sku">SKU: ${prod.sku}</div>
+                    </div>
+                    <div class="producto-inputs">
+                        <input type="text" 
+                               inputmode="decimal"
+                               value="${valorMostrar}" 
+                               placeholder="0"
+                               onchange="actualizarCantidadEspecial(${clienteId}, '${prod.sku}', this.value)">
+                    </div>
+                `;
+                lista.appendChild(div);
+            });
+        }
+
+        function actualizarTotalesEspeciales() {
+            const totalClientes = clientesEspeciales.length;
+            const totalCajas = clientesEspeciales.reduce((sum, cliente) => {
+                return sum + Object.values(cliente.cantidades).reduce((s, cant) => s + cant, 0);
+            }, 0);
+
+            const badge = document.getElementById('totalBadgeEspecial');
+            const totalFormateado = totalCajas % 1 === 0 ? totalCajas : totalCajas.toFixed(1).replace('.', ',');
+            
+            document.getElementById('totalClientesEspeciales').textContent = totalClientes;
+            document.getElementById('totalCajasEspeciales').textContent = totalFormateado;
+            
+            badge.classList.toggle('hidden', totalClientes === 0);
+        }
+        
+        function toggleClienteEspecial() {
+            const checkbox = document.getElementById('esEspecial');
+            const container = document.getElementById('clienteEspecialContainer');
+            const inputCliente = document.getElementById('codigoCliente');
+            
+            if (checkbox.checked) {
+                container.classList.remove('hidden');
+                inputCliente.required = true;
+            } else {
+                container.classList.add('hidden');
+                inputCliente.required = false;
+                inputCliente.value = '';
+            }
+        }
+
         function cambiarRuta() {
             rutaActual = document.getElementById('ruta').value;
             const mostrarPromo = RUTAS_CON_PROMO.includes(rutaActual);
@@ -578,19 +927,30 @@
             const btnEnviar = document.getElementById('btnEnviar');
             const alertSuccess = document.getElementById('alertSuccess');
             const alertError = document.getElementById('alertError');
-            const alertInfo = document.getElementById('alertInfo');
             const errorMessage = document.getElementById('errorMessage');
             
             alertSuccess.classList.add('hidden');
             alertError.classList.add('hidden');
-            alertInfo.classList.add('hidden');
             
             if (!ruta) {
                 alert('Debe seleccionar una ruta');
                 return;
             }
             
-            const productosConCantidad = Object.entries(cantidades)
+            // Validar clientes especiales
+            for (const cliente of clientesEspeciales) {
+                if (!cliente.codigo.trim()) {
+                    alert(`Debe ingresar el código del cliente en Cliente Especial #${clientesEspeciales.indexOf(cliente) + 1}`);
+                    return;
+                }
+                if (Object.keys(cliente.cantidades).length === 0) {
+                    alert(`Debe ingresar al menos un producto para Cliente Especial #${clientesEspeciales.indexOf(cliente) + 1} o eliminarlo`);
+                    return;
+                }
+            }
+            
+            // Productos normales
+            const productosNormales = Object.entries(cantidades)
                 .filter(([_, cantidad]) => cantidad > 0)
                 .map(([sku, cantidad]) => {
                     const producto = productos.find(p => p.sku === sku);
@@ -601,12 +961,37 @@
                         sku: sku,
                         producto: producto?.nombre || '',
                         cantidad: cantidad,
-                        promo: promos[sku] ? true : false
+                        promo: promos[sku] ? true : false,
+                        es_especial: false,
+                        codigo_cliente: null
                     };
                 });
             
-            if (productosConCantidad.length === 0) {
-                alert('Debe ingresar al menos una cantidad');
+            // Productos especiales de todos los clientes
+            const productosEspeciales = [];
+            clientesEspeciales.forEach(cliente => {
+                Object.entries(cliente.cantidades)
+                    .filter(([_, cantidad]) => cantidad > 0)
+                    .forEach(([sku, cantidad]) => {
+                        const producto = productos.find(p => p.sku === sku);
+                        productosEspeciales.push({
+                            fecha: new Date().toLocaleDateString('es-CO'),
+                            hora: new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }),
+                            ruta: ruta,
+                            sku: sku,
+                            producto: producto?.nombre || '',
+                            cantidad: cantidad,
+                            promo: false,
+                            es_especial: true,
+                            codigo_cliente: cliente.codigo.trim()
+                        });
+                    });
+            });
+            
+            const todosLosProductos = [...productosNormales, ...productosEspeciales];
+            
+            if (todosLosProductos.length === 0) {
+                alert('Debe ingresar al menos una cantidad en pedido normal o especial');
                 return;
             }
             
@@ -637,7 +1022,7 @@
                         'Content-Type': 'application/json',
                         'Prefer': 'return=minimal'
                     },
-                    body: JSON.stringify(productosConCantidad)
+                    body: JSON.stringify(todosLosProductos)
                 });
                 
                 if (!response.ok) {
@@ -648,6 +1033,17 @@
                 alertSuccess.classList.remove('hidden');
                 modoEdicion = false;
                 cantidades = {};
+                promos = {};
+                clientesEspeciales = [];
+                document.getElementById('ruta').value = '';
+                rutaActual = '';
+                renderProductos();
+                renderClientesEspeciales();
+                actualizarTotalesEspeciales();
+                
+                setTimeout(() => {
+                    alertSuccess.classList.add('hidden');
+                }, 5000);
                 promos = {};
                 document.getElementById('ruta').value = '';
                 rutaActual = '';

@@ -871,22 +871,57 @@
                     return;
                 }
                 
-                // Cargar las cantidades y promos
+                // Separar pedidos normales de especiales
                 cantidades = {};
                 promos = {};
+                clientesEspeciales = [];
+                
+                const clientesMap = {}; // Agrupar por código de cliente
                 
                 pedidosHoy.forEach(item => {
-                    cantidades[item.sku] = item.cantidad;
-                    if (item.promo) {
-                        promos[item.sku] = true;
+                    if (item.es_especial && item.codigo_cliente) {
+                        // Es pedido especial
+                        if (!clientesMap[item.codigo_cliente]) {
+                            clientesMap[item.codigo_cliente] = {
+                                id: Date.now() + Math.random(), // ID único
+                                codigo: item.codigo_cliente,
+                                cantidades: {}
+                            };
+                        }
+                        clientesMap[item.codigo_cliente].cantidades[item.sku] = item.cantidad;
+                    } else {
+                        // Es pedido normal
+                        cantidades[item.sku] = item.cantidad;
+                        if (item.promo) {
+                            promos[item.sku] = true;
+                        }
                     }
                 });
+                
+                // Convertir el map de clientes a array
+                clientesEspeciales = Object.values(clientesMap);
                 
                 modoEdicion = true;
                 renderProductos();
                 actualizarTotal();
                 
-                infoMessage.textContent = `Pedido cargado. ${pedidosHoy.length} productos encontrados. Puede modificar las cantidades.`;
+                // Renderizar clientes especiales si existen
+                if (clientesEspeciales.length > 0) {
+                    renderClientesEspeciales();
+                    actualizarTotalesEspeciales();
+                    // Abrir la sección de especiales
+                    const contenido = document.getElementById('contenidoEspecial');
+                    const icono = document.getElementById('iconoEspecial');
+                    if (!contenido.classList.contains('abierto')) {
+                        contenido.classList.add('abierto');
+                        icono.classList.add('abierto');
+                    }
+                }
+                
+                const totalNormales = Object.keys(cantidades).length;
+                const totalEspeciales = clientesEspeciales.reduce((sum, c) => sum + Object.keys(c.cantidades).length, 0);
+                
+                infoMessage.textContent = `Pedido cargado. ${totalNormales} productos normales, ${clientesEspeciales.length} cliente(s) especial(es) con ${totalEspeciales} productos. Puede modificar las cantidades.`;
                 alertInfo.classList.remove('hidden');
                 
                 // Scroll suave hacia arriba

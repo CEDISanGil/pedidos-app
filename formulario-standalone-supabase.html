@@ -483,144 +483,41 @@
         
         const RUTAS_CON_PROMO = ['SG1907', 'SG1907-1', 'SG10o6', 'SG10o6-1'];
         
-        const productos = [
-            { sku: "135718", nombre: "CC 8 ONZAS" },
-            { sku: "56704", nombre: "QUATRO 8 ONZ" },
-            { sku: "56521", nombre: "SPRITE 8 ONZ" },
-            { sku: "92814", nombre: "MANZA. 8 ONZ" },
-            { sku: "136559", nombre: "ZUCARITAS" },
-            { sku: "136560", nombre: "CHOCO KRISPIS" },
-            { sku: "136561", nombre: "FROOT LOOPS" },
-            { sku: "92770", nombre: "BRISA MAN 1.5" },
-            { sku: "92769", nombre: "BRISA MAN 600" },
-            { sku: "92768", nombre: "BRISA MAN 280" },
-            { sku: "160053", nombre: "CC 350" },
-            { sku: "56705", nombre: "QUATRO 350" },
-            { sku: "160033", nombre: "SODA" },
-            { sku: "160070", nombre: "SPRITE 350" },
-            { sku: "160067", nombre: "KOLA 350" },
-            { sku: "136399", nombre: "CC. LATA 269" },
-            { sku: "160029", nombre: "CC. LATA 330" },
-            { sku: "136401", nombre: "CC. CAFÉ 269" },
-            { sku: "135746", nombre: "CC. 1 LTR" },
-            { sku: "56707", nombre: "QUATRO LITRO" },
-            { sku: "135665", nombre: "CC. REF PET" },
-            { sku: "160040", nombre: "CC. 20 ONZAS" },
-            { sku: "135759", nombre: "ZERO 20 ONZAS" },
-            { sku: "160318", nombre: "FLEXI 400" },
-            { sku: "56706", nombre: "QUATRO 400" },
-            { sku: "160297", nombre: "SPRITE 400" },
-            { sku: "160479", nombre: "KOLA ROMAN" },
-            { sku: "135760", nombre: "ZERO 400" },
-            { sku: "160048", nombre: "BOTELLONES" },
-            { sku: "160151", nombre: "AGUA BIDON" },
-            { sku: "136533", nombre: "TRUL MAS" },
-            { sku: "136630", nombre: "TRUL MINIPACK" },
-            { sku: "136632", nombre: "TRUL MAXIPACK" },
-            { sku: "136487", nombre: "LOKIN CARAMEL" },
-            { sku: "136479", nombre: "CHAO FRESA" },
-            { sku: "136478", nombre: "CHAO MENTA" },
-            { sku: "136485", nombre: "BIANCHI CHOC" },
-            { sku: "136484", nombre: "BIANCHI BLANCO" },
-            { sku: "136475", nombre: "BARRILETE" },
-            { sku: "136622", nombre: "CHOCOLORES" },
-            { sku: "135664", nombre: "CC 1.5" },
-            { sku: "56709", nombre: "QUATRO 1.5" },
-            { sku: "135757", nombre: "CC. ZERO 1.5" },
-            { sku: "160102", nombre: "SPRITE 1.5" },
-            { sku: "160101", nombre: "SODA 1.5" },
-            { sku: "160100", nombre: "GINGER 1.5" },
-            { sku: "160099", nombre: "KOLA ROMAN 1.5" },
-            { sku: "56820", nombre: "QUATRO 2,5 ML" },
-            { sku: "92740", nombre: "BRISA LIMON 1.5" },
-            { sku: "120159", nombre: "MANDARINA 1.5" },
-            { sku: "136159", nombre: "CC. 1 LT.  PET" },
-            { sku: "135662", nombre: "CC. 3 LTS" },
-            { sku: "56711", nombre: "QUATRO 3 LTS" },
-            { sku: "160124", nombre: "SPRITE 3 LTS" },
-            { sku: "135663", nombre: "CC 2.5" },
-            { sku: "135755", nombre: "CC ZERO 2.5" },
-            { sku: "136133", nombre: "CC 2.25" },
-            { sku: "136462", nombre: "CHOCO KRISP MEGA" },
-            { sku: "136465", nombre: "FROOT LOOPS" },
-            { sku: "136461", nombre: "ZUCARITAS MEGA" },
-            { sku: "136467", nombre: "OREO TACO" },
-            { sku: "136466", nombre: "OREO ROLLO" },
-            { sku: "120119", nombre: "CITRUS 2.5" },
-            { sku: "120118", nombre: "CITRUS 1,5" },
-            { sku: "120185", nombre: "PONCHE 1.5" },
-            { sku: "120117", nombre: "CITRUS 400 ML" },
-            { sku: "120184", nombre: "PONCHE 400 ML" },
-            { sku: "120158", nombre: "MANDAR. 400 ML" },
-            { sku: "120156", nombre: "MONSTER VERDE" },
-            { sku: "120027", nombre: "MONSTER VIOLET" },
-            { sku: "120181", nombre: "MONSTER MAN LOCO" },
-            { sku: "120112", nombre: "MONSTER PARADISE" },
-            { sku: "160378", nombre: "MONSTER ULTRA" },
-            { sku: "120023", nombre: "MONTER BLU" },
-            { sku: "120175", nombre: "MONSTER ROSA" },
-            { sku: "135676", nombre: "DUO CC 2.5" },
-            { sku: "136247", nombre: "DUO CC + QUATRO" },
-            { sku: "92794", nombre: "MARACUYA 600" },
-            { sku: "92736", nombre: "BRISA LIMON 600" },
-            { sku: "136623", nombre: "TRIDENT MENTA *18" },
-            { sku: "136539", nombre: "TRIDENT MORA *18" },
-            { sku: "136624", nombre: "TRIDENT SANDIA *18" },
-            { sku: "136627", nombre: "TRDENT 5SYERBA" },
-            { sku: "136628", nombre: "TRDENT 5S MORA" },
-            { sku: "160200", nombre: "CC 250" },
-            { sku: "135761", nombre: "CC ZERO 250" },
-            { sku: "120187", nombre: "CITRUS 250" },
-            { sku: "56703", nombre: "QUATRO 250" },
-            { sku: "160323", nombre: "KOLA ROMAN 250" },
-            { sku: "160121", nombre: "POWER ROJO" },
-            { sku: "160122", nombre: "POWER AZUL" },
-            { sku: "56452", nombre: "SODA 400 ML" },
-            { sku: "56453", nombre: "GINGER 400 ML" },
-            { sku: "56497", nombre: "GINGER 10 ONZ." },
-            { sku: "56498", nombre: "SODA 10 ONZ." },
-            { sku: "160188", nombre: "FUZE MANZA.  X 6" },
-            { sku: "160186", nombre: "FUZE DURAN. X6" },
-            { sku: "160187", nombre: "FUZE LIMON. X6" },
-            { sku: "160223", nombre: "FUZE MANGO M. X6" },
-            { sku: "160008", nombre: "ECOFLEX" },
-            { sku: "160047", nombre: "AGUA NORMAL 600" },
-            { sku: "160046", nombre: "AGUA GAS PET  600" },
-            { sku: "160240", nombre: "MANTIAL GAS 600" },
-            { sku: "160241", nombre: "MANTIAL NORMAL" },
-            { sku: "92764", nombre: "MANA. VIDRIO" },
-            { sku: "160132", nombre: "MANTIAL GAS 330" },
-            { sku: "160170", nombre: "BRISA LIMON 280" },
-            { sku: "160168", nombre: "BRISA NORMAL" },
-            { sku: "92793", nombre: "MARACUYA 280" },
-            { sku: "136020", nombre: "ATUN ACEITE" },
-            { sku: "136024", nombre: "A. RAYADA ACEITE" },
-            { sku: "136541", nombre: "ENSA. NATURAL" },
-            { sku: "120131", nombre: "FRUT. MANGO 500" },
-            { sku: "120132", nombre: "FRUTAL PIÑA 500" },
-            { sku: "120128", nombre: "MANGOFRESA 500" },
-            { sku: "120129", nombre: "FRUTAL MORA 500" },
-            { sku: "120083", nombre: "SALPICON  500" },
-            { sku: "120188", nombre: "MANGO 1,2" },
-            { sku: "120191", nombre: "MORA 1,2" },
-            { sku: "120190", nombre: "MANGO FRESA 1,2" },
-            { sku: "136674", nombre: "CHOCOPOSTRE" },
-            { sku: "136671", nombre: "TRU.max vendido" },
-            { sku: "136670", nombre: "TRU.topexLULU" },
-            { sku: "136675", nombre: "TRU.sabor surtido" },
-            { sku: "136712", nombre: "TRU. Mas vendido" },
-            { sku: "136673", nombre: "TRU. Masmelos" },
-            { sku: "136613", nombre: "PALOMITAS" },
-            { sku: "136616", nombre: "RIZADAS MAYONESA" },
-            { sku: "136619", nombre: "GOLPE" },
-            { sku: "136710", nombre: "CLUB SOCIAL" }
-        ];
-        
+        // Productos se cargarán dinámicamente desde Supabase
         let cantidades = {};
         let promos = {};
-        let clientesEspeciales = []; // Array de objetos: { codigo: '123', cantidades: {}, totalCajas: 0 }
+        let clientesEspeciales = [];
         let rutaActual = '';
         let modoEdicion = false;
+        
+        // Cargar productos activos desde Supabase
+        async function cargarProductosActivos() {
+            try {
+                const response = await fetch(
+                    `${SUPABASE_URL}/rest/v1/productos_disponibles?activo=eq.true&select=*&order=nombre.asc`,
+                    {
+                        headers: {
+                            'apikey': SUPABASE_KEY,
+                            'Authorization': `Bearer ${SUPABASE_KEY}`
+                        }
+                    }
+                );
+
+                if (!response.ok) throw new Error('Error al cargar productos');
+
+                productos = await response.json();
+                
+                // Renderizar productos después de cargarlos
+                renderProductos();
+
+            } catch (error) {
+                console.error('Error cargando productos:', error);
+                alert('Error al cargar los productos disponibles. Por favor recarga la página.');
+            }
+        }
+        
+        // Cargar productos al iniciar la página
+        cargarProductosActivos();
         
         function toggleSeccionEspecial() {
             const contenido = document.getElementById('contenidoEspecial');

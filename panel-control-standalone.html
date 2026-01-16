@@ -261,6 +261,188 @@
         .btn-eliminar-pedido:active {
             transform: scale(0.95);
         }
+        .btn-info {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        }
+        .gestion-skus-section {
+            margin-top: 25px;
+            background: white;
+            border: 2px solid #3b82f6;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .btn-toggle-skus {
+            width: 100%;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            border: none;
+            padding: 15px 20px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: background 0.3s;
+        }
+        .btn-toggle-skus:hover {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        }
+        .btn-toggle-skus #iconoSKUs {
+            font-size: 14px;
+            transition: transform 0.3s;
+        }
+        .btn-toggle-skus #iconoSKUs.abierto {
+            transform: rotate(90deg);
+        }
+        .contenido-skus {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            background: #f8fafc;
+        }
+        .contenido-skus.hidden {
+            max-height: 0;
+        }
+        .contenido-skus:not(.hidden) {
+            max-height: 800px;
+            overflow-y: auto;
+            transition: max-height 0.5s ease-in;
+        }
+        .skus-header {
+            padding: 20px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        .skus-footer {
+            padding: 20px;
+            border-top: 2px solid #e5e7eb;
+            text-align: right;
+        }
+        .search-productos {
+            margin-bottom: 20px;
+        }
+        .search-productos input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+        .search-productos input:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+        .productos-gestion-lista {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 20px;
+        }
+        .producto-gestion-item {
+            background: #f9fafb;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s;
+        }
+        .producto-gestion-item:hover {
+            background: #f3f4f6;
+            border-color: #d1d5db;
+        }
+        .producto-gestion-item.inactivo {
+            opacity: 0.5;
+        }
+        .producto-gestion-checkbox {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+        }
+        .producto-gestion-info {
+            flex: 1;
+        }
+        .producto-gestion-nombre {
+            font-weight: 600;
+            color: #1f2937;
+            font-size: 14px;
+        }
+        .producto-gestion-sku {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 2px;
+        }
+        .producto-gestion-estado {
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+        .producto-gestion-estado.activo {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        .producto-gestion-estado.inactivo {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        .btn-editar-producto {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        .btn-editar-producto:hover {
+            background: #2563eb;
+            transform: scale(1.05);
+        }
+        .producto-editando {
+            background: #fef3c7 !important;
+            border-color: #f59e0b !important;
+        }
+        .input-editar {
+            width: 100%;
+            padding: 8px;
+            border: 2px solid #3b82f6;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .input-editar:focus {
+            outline: none;
+            border-color: #2563eb;
+        }
+        .btn-guardar-edicion {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        .btn-guardar-edicion:hover {
+            background: #059669;
+        }
+        .btn-cancelar-edicion {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        .btn-cancelar-edicion:hover {
+            background: #dc2626;
+        }
     </style>
 </head>
 <body>
@@ -322,6 +504,33 @@
                 <button class="btn btn-danger" onclick="limpiarPedidos()">
                     🗑️ Limpiar Todo
                 </button>
+            </div>
+
+            <!-- SECCIÓN: SKUs Habilitados (Colapsable) -->
+            <div class="gestion-skus-section">
+                <button class="btn-toggle-skus" onclick="toggleGestionSKUs()">
+                    <span id="iconoSKUs">▶</span>
+                    <span>📦 SKUs Habilitados</span>
+                </button>
+
+                <div id="contenidoGestionSKUs" class="contenido-skus hidden">
+                    <div class="skus-header">
+                        <p style="color: #666; margin-bottom: 15px;">
+                            Marque los productos que ESTÁN disponibles. Los productos desmarcados NO aparecerán en el formulario de pedidos.
+                        </p>
+                        <div class="search-productos">
+                            <input type="text" id="buscarProductoGestion" placeholder="🔍 Buscar por SKU o nombre..." oninput="filtrarProductosGestion()">
+                        </div>
+                    </div>
+
+                    <div id="listaProductosGestion" class="productos-gestion-lista"></div>
+
+                    <div class="skus-footer">
+                        <button class="btn btn-success" onclick="guardarProductosDisponibles()">
+                            💾 Guardar Cambios
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -879,6 +1088,242 @@
             link.download = `SAP_${rutaTexto}_${new Date().toISOString().split('T')[0]}.txt`;
             link.click();
             URL.revokeObjectURL(url);
+        }
+
+        // ============================================================
+        // GESTIÓN DE PRODUCTOS DISPONIBLES
+        // ============================================================
+
+        let productosDisponibles = [];
+
+        async function cargarProductosDisponibles() {
+            try {
+                const response = await fetch(
+                    `${SUPABASE_URL}/rest/v1/productos_disponibles?select=*&order=nombre.asc`,
+                    {
+                        headers: {
+                            'apikey': SUPABASE_KEY,
+                            'Authorization': `Bearer ${SUPABASE_KEY}`
+                        }
+                    }
+                );
+
+                if (!response.ok) throw new Error('Error al cargar productos');
+
+                productosDisponibles = await response.json();
+                renderProductosGestion();
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al cargar productos disponibles');
+            }
+        }
+
+        function toggleGestionSKUs() {
+            const contenido = document.getElementById('contenidoGestionSKUs');
+            const icono = document.getElementById('iconoSKUs');
+            
+            contenido.classList.toggle('hidden');
+            icono.classList.toggle('abierto');
+            
+            // Cargar productos al abrir por primera vez
+            if (!contenido.classList.contains('hidden') && productosDisponibles.length === 0) {
+                cargarProductosDisponibles();
+            }
+        }
+
+        function renderProductosGestion(filtro = '') {
+            const lista = document.getElementById('listaProductosGestion');
+            
+            const productosFiltrados = filtro
+                ? productosDisponibles.filter(p =>
+                    p.nombre.toLowerCase().includes(filtro.toLowerCase()) ||
+                    p.sku.includes(filtro)
+                  )
+                : productosDisponibles;
+
+            lista.innerHTML = productosFiltrados.map(producto => `
+                <div class="producto-gestion-item ${!producto.activo ? 'inactivo' : ''}" id="producto-${producto.id}">
+                    <input 
+                        type="checkbox" 
+                        class="producto-gestion-checkbox" 
+                        data-sku="${producto.sku}"
+                        ${producto.activo ? 'checked' : ''}
+                        onchange="toggleProducto('${producto.sku}', this.checked)"
+                    >
+                    <div class="producto-gestion-info">
+                        <div class="producto-gestion-nombre">${producto.nombre}</div>
+                        <div class="producto-gestion-sku">SKU: ${producto.sku}</div>
+                    </div>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <span class="producto-gestion-estado ${producto.activo ? 'activo' : 'inactivo'}">
+                            ${producto.activo ? '✓ Disponible' : '✕ No disponible'}
+                        </span>
+                        <button class="btn-editar-producto" onclick="editarProducto(${producto.id})" title="Editar producto">
+                            ✏️
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filtrarProductosGestion() {
+            const filtro = document.getElementById('buscarProductoGestion').value;
+            renderProductosGestion(filtro);
+        }
+
+        function toggleProducto(sku, activo) {
+            const producto = productosDisponibles.find(p => p.sku === sku);
+            if (producto) {
+                producto.activo = activo;
+                renderProductosGestion(document.getElementById('buscarProductoGestion').value);
+            }
+        }
+
+        async function guardarProductosDisponibles() {
+            try {
+                const updates = productosDisponibles.map(producto =>
+                    fetch(
+                        `${SUPABASE_URL}/rest/v1/productos_disponibles?sku=eq.${producto.sku}`,
+                        {
+                            method: 'PATCH',
+                            headers: {
+                                'apikey': SUPABASE_KEY,
+                                'Authorization': `Bearer ${SUPABASE_KEY}`,
+                                'Content-Type': 'application/json',
+                                'Prefer': 'return=minimal'
+                            },
+                            body: JSON.stringify({
+                                activo: producto.activo,
+                                updated_at: new Date().toISOString()
+                            })
+                        }
+                    )
+                );
+
+                await Promise.all(updates);
+
+                alert('✅ Productos actualizados correctamente. Los cambios se reflejarán en el formulario de inmediato.');
+                // La sección permanece abierta para seguir editando
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Error al guardar cambios');
+            }
+        }
+
+        // ============================================================
+        // EDICIÓN DE PRODUCTOS
+        // ============================================================
+
+        let productoEditando = null;
+
+        function editarProducto(id) {
+            const producto = productosDisponibles.find(p => p.id === id);
+            if (!producto) return;
+
+            // Cancelar cualquier edición previa
+            if (productoEditando) {
+                cancelarEdicion();
+            }
+
+            productoEditando = { ...producto }; // Copia de respaldo
+
+            const elemento = document.getElementById(`producto-${id}`);
+            if (!elemento) return;
+
+            elemento.classList.add('producto-editando');
+
+            elemento.innerHTML = `
+                <input 
+                    type="checkbox" 
+                    class="producto-gestion-checkbox" 
+                    ${producto.activo ? 'checked' : ''}
+                    onchange="toggleProducto('${producto.sku}', this.checked)"
+                >
+                <div class="producto-gestion-info" style="flex: 1;">
+                    <input type="text" 
+                           class="input-editar" 
+                           id="edit-nombre-${id}" 
+                           value="${producto.nombre}"
+                           placeholder="Nombre del producto">
+                    <input type="text" 
+                           class="input-editar" 
+                           id="edit-sku-${id}" 
+                           value="${producto.sku}"
+                           placeholder="SKU"
+                           style="margin-top: 5px; font-weight: normal; font-size: 13px;">
+                </div>
+                <div style="display: flex; gap: 6px; flex-direction: column;">
+                    <button class="btn-guardar-edicion" onclick="guardarEdicion(${id})">
+                        ✓ Guardar
+                    </button>
+                    <button class="btn-cancelar-edicion" onclick="cancelarEdicion()">
+                        ✕ Cancelar
+                    </button>
+                </div>
+            `;
+        }
+
+        async function guardarEdicion(id) {
+            const nuevoNombre = document.getElementById(`edit-nombre-${id}`).value.trim();
+            const nuevoSku = document.getElementById(`edit-sku-${id}`).value.trim();
+
+            if (!nuevoNombre || !nuevoSku) {
+                alert('❌ El nombre y SKU son obligatorios');
+                return;
+            }
+
+            // Verificar si el nuevo SKU ya existe (solo si cambió)
+            const producto = productosDisponibles.find(p => p.id === id);
+            if (nuevoSku !== producto.sku) {
+                const skuExiste = productosDisponibles.some(p => p.sku === nuevoSku && p.id !== id);
+                if (skuExiste) {
+                    alert('❌ Ya existe un producto con ese SKU');
+                    return;
+                }
+            }
+
+            try {
+                // Actualizar en Supabase
+                const response = await fetch(
+                    `${SUPABASE_URL}/rest/v1/productos_disponibles?id=eq.${id}`,
+                    {
+                        method: 'PATCH',
+                        headers: {
+                            'apikey': SUPABASE_KEY,
+                            'Authorization': `Bearer ${SUPABASE_KEY}`,
+                            'Content-Type': 'application/json',
+                            'Prefer': 'return=minimal'
+                        },
+                        body: JSON.stringify({
+                            nombre: nuevoNombre,
+                            sku: nuevoSku,
+                            updated_at: new Date().toISOString()
+                        })
+                    }
+                );
+
+                if (!response.ok) throw new Error('Error al actualizar');
+
+                // Actualizar en el array local
+                producto.nombre = nuevoNombre;
+                producto.sku = nuevoSku;
+
+                productoEditando = null;
+                renderProductosGestion(document.getElementById('buscarProductoGestion').value);
+
+                alert('✅ Producto actualizado correctamente');
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Error al guardar la edición');
+            }
+        }
+
+        function cancelarEdicion() {
+            productoEditando = null;
+            renderProductosGestion(document.getElementById('buscarProductoGestion').value);
         }
 
         async function limpiarPedidos() {

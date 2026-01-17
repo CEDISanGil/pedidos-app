@@ -1099,7 +1099,7 @@
         async function cargarProductosDisponibles() {
             try {
                 const response = await fetch(
-                    `${SUPABASE_URL}/rest/v1/productos_disponibles?select=*&order=id.asc`,
+                    `${SUPABASE_URL}/rest/v1/productos_disponibles?select=*&order=orden.asc`,
                     {
                         headers: {
                             'apikey': SUPABASE_KEY,

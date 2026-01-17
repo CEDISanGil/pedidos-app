@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Pedido de Productos - Coca-Cola</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -126,7 +126,7 @@
             padding: 8px;
             border: 2px solid #e0e0e0;
             border-radius: 6px;
-            font-size: 14px;
+            font-size: 16px;
         }
         .producto-item input[type="text"]:focus,
         .producto-item input[type="number"]:focus {
@@ -560,8 +560,23 @@
             const valorNormalizado = valor.replace(',', '.');
             const cantidad = parseFloat(valorNormalizado) || 0;
             
+            // Buscar el producto para verificar límite
+            const producto = productos.find(p => p.sku === sku);
+            
             if (cantidad > 0) {
-                cliente.cantidades[sku] = cantidad;
+                // Validar cantidad máxima si existe
+                if (producto && producto.cantidad_maxima && cantidad > producto.cantidad_maxima) {
+                    alert(`⚠️ LÍMITE MÁXIMO: ${producto.nombre}\n\nCantidad máxima permitida: ${producto.cantidad_maxima} cajas\n\nSi necesita más, por favor contacte al administrador.`);
+                    
+                    // Resetear el input al máximo permitido
+                    const input = document.querySelector(`input[data-cliente="${clienteId}"][data-sku="${sku}"]`);
+                    if (input) {
+                        input.value = producto.cantidad_maxima;
+                        cliente.cantidades[sku] = producto.cantidad_maxima;
+                    }
+                } else {
+                    cliente.cantidades[sku] = cantidad;
+                }
             } else {
                 delete cliente.cantidades[sku];
             }
@@ -876,8 +891,23 @@
             const valorNormalizado = valor.replace(',', '.');
             const cantidad = parseFloat(valorNormalizado) || 0;
             
+            // Buscar el producto para verificar límite
+            const producto = productos.find(p => p.sku === sku);
+            
             if (cantidad > 0) {
-                cantidades[sku] = cantidad;
+                // Validar cantidad máxima si existe
+                if (producto && producto.cantidad_maxima && cantidad > producto.cantidad_maxima) {
+                    alert(`⚠️ LÍMITE MÁXIMO: ${producto.nombre}\n\nCantidad máxima permitida: ${producto.cantidad_maxima} cajas\n\nSi necesita más, por favor contacte al administrador.`);
+                    
+                    // Resetear el input al máximo permitido
+                    const input = document.querySelector(`input[data-sku="${sku}"]`);
+                    if (input) {
+                        input.value = producto.cantidad_maxima;
+                        cantidades[sku] = producto.cantidad_maxima;
+                    }
+                } else {
+                    cantidades[sku] = cantidad;
+                }
             } else {
                 delete cantidades[sku];
             }

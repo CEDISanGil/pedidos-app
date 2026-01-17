@@ -1153,7 +1153,10 @@
                     >
                     <div class="producto-gestion-info">
                         <div class="producto-gestion-nombre">${producto.nombre}</div>
-                        <div class="producto-gestion-sku">SKU: ${producto.sku}</div>
+                        <div class="producto-gestion-sku">
+                            SKU: ${producto.sku}
+                            ${producto.cantidad_maxima ? `<span style="color: #f59e0b; font-weight: 600; margin-left: 8px;">⚠️ Máx: ${producto.cantidad_maxima}</span>` : ''}
+                        </div>
                     </div>
                     <div style="display: flex; gap: 8px; align-items: center;">
                         <span class="producto-gestion-estado ${producto.activo ? 'activo' : 'inactivo'}">
@@ -1253,6 +1256,16 @@
                            value="${producto.sku}"
                            placeholder="SKU"
                            style="margin-top: 5px; font-weight: normal; font-size: 13px;">
+                    <input type="number" 
+                           class="input-editar" 
+                           id="edit-max-${id}" 
+                           value="${producto.cantidad_maxima || ''}"
+                           placeholder="Cantidad máxima (opcional)"
+                           min="1"
+                           style="margin-top: 5px; font-weight: normal; font-size: 13px;">
+                    <div style="font-size: 11px; color: #666; margin-top: 3px;">
+                        💡 Dejar vacío = sin límite | Ejemplo: 5 = máximo 5 cajas
+                    </div>
                 </div>
                 <div style="display: flex; gap: 6px; flex-direction: column;">
                     <button class="btn-guardar-edicion" onclick="guardarEdicion(${id})">
@@ -1268,6 +1281,8 @@
         async function guardarEdicion(id) {
             const nuevoNombre = document.getElementById(`edit-nombre-${id}`).value.trim();
             const nuevoSku = document.getElementById(`edit-sku-${id}`).value.trim();
+            const cantidadMaximaInput = document.getElementById(`edit-max-${id}`).value.trim();
+            const cantidadMaxima = cantidadMaximaInput ? parseInt(cantidadMaximaInput) : null;
 
             if (!nuevoNombre || !nuevoSku) {
                 alert('❌ El nombre y SKU son obligatorios');
@@ -1299,6 +1314,7 @@
                         body: JSON.stringify({
                             nombre: nuevoNombre,
                             sku: nuevoSku,
+                            cantidad_maxima: cantidadMaxima,
                             updated_at: new Date().toISOString()
                         })
                     }
@@ -1309,6 +1325,7 @@
                 // Actualizar en el array local
                 producto.nombre = nuevoNombre;
                 producto.sku = nuevoSku;
+                producto.cantidad_maxima = cantidadMaxima;
 
                 productoEditando = null;
                 renderProductosGestion(document.getElementById('buscarProductoGestion').value);

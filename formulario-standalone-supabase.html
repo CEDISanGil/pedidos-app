@@ -494,7 +494,7 @@
         async function cargarProductosActivos() {
             try {
                 const response = await fetch(
-                    `${SUPABASE_URL}/rest/v1/productos_disponibles?activo=eq.true&select=*&order=nombre.asc`,
+                    `${SUPABASE_URL}/rest/v1/productos_disponibles?activo=eq.true&select=*&order=id.asc`,
                     {
                         headers: {
                             'apikey': SUPABASE_KEY,

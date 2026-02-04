@@ -681,7 +681,8 @@
                     cantidad: item.cantidad,
                     promo: item.promo ? 'Sí' : 'N/A',
                     esEspecial: item.es_especial || false,
-                    codigoCliente: item.codigo_cliente || null
+                    codigoCliente: item.codigo_cliente || null,
+                    unidadMedida: item.unidad_medida || 'CJ'
                 });
             });
 
@@ -836,13 +837,14 @@
                 pedido.productos.forEach(prod => {
                     // Si es pedido especial, va a su propia hoja
                     if (prod.esEspecial && prod.codigoCliente) {
-                        productosEspeciales.push([
-                            pedido.ruta,
-                            prod.codigoCliente,
-                            prod.sku,
-                            prod.cantidad,
-                            prod.nombre
-                        ]);
+                        productosEspeciales.push({
+                            ruta: pedido.ruta,
+                            cliente: prod.codigoCliente,
+                            sku: prod.sku,
+                            cantidad: prod.cantidad,
+                            unidad: prod.unidadMedida || 'CJ',
+                            producto: prod.nombre
+                        });
                     } else {
                         // Lógica normal para pedidos regulares
                         const fila = [
@@ -1014,6 +1016,7 @@
                     { header: 'CÓDIGO CLIENTE', key: 'cliente', width: 15 },
                     { header: 'SKU', key: 'sku', width: 12 },
                     { header: 'CANTIDAD', key: 'cantidad', width: 10 },
+                    { header: 'UNIDAD', key: 'unidad', width: 8 },
                     { header: 'PRODUCTO', key: 'producto', width: 35 }
                 ];
 
@@ -1039,7 +1042,7 @@
                 // Aplicar filtros automáticos
                 wsEspeciales.autoFilter = {
                     from: 'A1',
-                    to: 'E1'
+                    to: 'F1'
                 };
             }
 

@@ -160,6 +160,67 @@
         .producto-item {
             display: flex;
             justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
+            margin-bottom: 8px;
+        }
+        .cliente-especial-item {
+            background: #fffbeb;
+            border: 2px solid #f59e0b;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+        }
+        .cliente-especial-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+        }
+        .cliente-especial-header:hover {
+            background: #fef3c7;
+            border-radius: 6px;
+        }
+        .cliente-codigo {
+            font-weight: 700;
+            color: #92400e;
+            font-size: 15px;
+        }
+        .cliente-toggle {
+            font-size: 18px;
+            color: #f59e0b;
+            transition: transform 0.3s;
+        }
+        .cliente-toggle.abierto {
+            transform: rotate(90deg);
+        }
+        .cliente-productos {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            margin-top: 0;
+        }
+        .cliente-productos.abierto {
+            max-height: 500px;
+            margin-top: 12px;
+            transition: max-height 0.5s ease-in;
+        }
+        .cliente-producto-item {
+            background: white;
+            padding: 8px;
+            border-radius: 4px;
+            margin-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 3px solid #f59e0b;
+        }
+        .producto-item {
+            display: flex;
+            justify-content: space-between;
             padding: 10px 0;
             border-bottom: 1px solid #e0e0e0;
         }
@@ -598,6 +659,16 @@
             }
         }
 
+        function toggleClienteDetalle(clienteId) {
+            const detalle = document.getElementById(clienteId);
+            const toggle = document.getElementById(`toggle_${clienteId}`);
+            
+            if (detalle && toggle) {
+                detalle.classList.toggle('abierto');
+                toggle.classList.toggle('abierto');
+            }
+        }
+
         async function eliminarPedido(ruta, fecha, hora) {
             const confirmacion = confirm(
                 `¿Está seguro de eliminar el pedido de la ruta ${ruta}?\n\n` +
@@ -781,8 +852,23 @@
             }
 
             lista.innerHTML = pedidosFiltrados.map(pedido => {
+                // Separar productos normales de clientes especiales
+                const productosNormales = pedido.productos.filter(p => !p.esEspecial);
+                const productosEspeciales = pedido.productos.filter(p => p.esEspecial);
+                
+                // Agrupar productos especiales por cliente
+                const clientesMap = {};
+                productosEspeciales.forEach(prod => {
+                    const codigo = prod.codigoCliente;
+                    if (!clientesMap[codigo]) {
+                        clientesMap[codigo] = [];
+                    }
+                    clientesMap[codigo].push(prod);
+                });
+                
                 const total = pedido.productos.reduce((sum, p) => sum + p.cantidad, 0);
                 const totalFormateado = (total % 1 === 0 ? total : total.toFixed(1)).toString().replace('.', ',');
+                
                 return `
                     <div class="pedido-card">
                         <div class="pedido-header">
@@ -797,8 +883,11 @@
                                 </button>
                             </div>
                         </div>
+                        
+                        ${productosNormales.length > 0 ? `
                         <div class="productos-list">
-                            ${pedido.productos.map(prod => {
+                            <div style="font-weight: 600; color: #666; margin-bottom: 10px; font-size: 13px;">📦 Pedido Normal</div>
+                            ${productosNormales.map(prod => {
                                 const cantidadFormateada = prod.cantidad.toString().replace('.', ',');
                                 return `
                                 <div class="producto-item">
@@ -812,6 +901,48 @@
                                 `;
                             }).join('')}
                         </div>
+                        ` : ''}
+                        
+                        ${Object.keys(clientesMap).length > 0 ? `
+                        <div class="productos-list" style="margin-top: ${productosNormales.length > 0 ? '15px' : '0'};">
+                            <div style="font-weight: 600; color: #f59e0b; margin-bottom: 10px; font-size: 13px;">💳 Clientes Especiales</div>
+                            ${Object.entries(clientesMap).map(([codigo, prods]) => {
+                                const totalCliente = prods.reduce((sum, p) => sum + p.cantidad, 0);
+                                const totalClienteFormateado = (totalCliente % 1 === 0 ? totalCliente : totalCliente.toFixed(1)).toString().replace('.', ',');
+                                const clienteId = `cliente_${pedido.ruta}_${pedido.fecha}_${codigo}`.replace(/[^a-zA-Z0-9_]/g, '_');
+                                
+                                return `
+                                <div class="cliente-especial-item">
+                                    <div class="cliente-especial-header" onclick="toggleClienteDetalle('${clienteId}')">
+                                        <div>
+                                            <span class="cliente-codigo">👤 Cliente: ${codigo}</span>
+                                            <span style="color: #666; font-size: 13px; margin-left: 10px;">${prods.length} producto(s) • ${totalClienteFormateado} cajas</span>
+                                        </div>
+                                        <span class="cliente-toggle" id="toggle_${clienteId}">▶</span>
+                                    </div>
+                                    <div class="cliente-productos" id="${clienteId}">
+                                        ${prods.map(prod => {
+                                            const cantidadFormateada = prod.cantidad.toString().replace('.', ',');
+                                            const unidad = prod.unidadMedida || 'CJ';
+                                            return `
+                                            <div class="cliente-producto-item">
+                                                <div>
+                                                    <div style="font-weight: 600; color: #1f2937;">${prod.nombre}</div>
+                                                    <div style="font-size: 12px; color: #666;">SKU: ${prod.sku}</div>
+                                                </div>
+                                                <div style="display: flex; align-items: center; gap: 8px;">
+                                                    <span style="font-weight: 700; color: #f59e0b; font-size: 16px;">${cantidadFormateada}</span>
+                                                    <span style="font-size: 12px; color: #666; background: #fef3c7; padding: 2px 6px; border-radius: 4px;">${unidad}</span>
+                                                </div>
+                                            </div>
+                                            `;
+                                        }).join('')}
+                                    </div>
+                                </div>
+                                `;
+                            }).join('')}
+                        </div>
+                        ` : ''}
                     </div>
                 `;
             }).join('');

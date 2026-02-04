@@ -376,7 +376,7 @@
     <div class="container">
         <div class="header">
             <img src="https://cedisangil.github.io/pedidos-app/nuevo-logo.png" alt="Coca-Cola" class="logo">
-            <h1>📦 Pedido de Productos</h1>
+            <h1 style="color: #000000;">Pedido de Productos</h1>
             <p>Complete su pedido diario</p>
         </div>
         
@@ -430,9 +430,6 @@
             
             <div class="form-group">
                 <label>Productos - Pedido Normal (Ingrese cantidades en cajas)</label>
-                <div style="background: #fff3cd; border: 1px solid #ffc107; padding: 10px; border-radius: 8px; margin-bottom: 10px; font-size: 12px;">
-                    💡 <strong>Nota:</strong> Puede usar decimales con coma. Ejemplo: 0,5 = 5 unidades, 0,6 = 6 unidades, 2,3 = 2 cajas + 3 unidades
-                </div>
                 <div class="productos-lista" id="productosLista"></div>
             </div>
             
@@ -486,7 +483,7 @@
         // Productos se cargarán dinámicamente desde Supabase
         let cantidades = {};
         let promos = {};
-        let clientesEspeciales = [];
+        let clientesEspeciales = []; // { id, codigo, cantidades: {sku: cantidad}, unidades: {sku: true/false} }
         let rutaActual = '';
         let modoEdicion = false;
         
@@ -531,7 +528,8 @@
             const nuevoCliente = {
                 id: Date.now(),
                 codigo: '',
-                cantidades: {}
+                cantidades: {},
+                unidades: {} // {sku: true} = botellas, {sku: false} o undefined = cajas
             };
             clientesEspeciales.push(nuevoCliente);
             renderClientesEspeciales();
@@ -584,6 +582,21 @@
             // Solo actualizar totales, NO re-renderizar todo
             actualizarTotalesEspeciales();
             actualizarStatsCliente(clienteId);
+        }
+
+        function actualizarUnidadEspecial(clienteId, sku, esBotellas) {
+            const cliente = clientesEspeciales.find(c => c.id === clienteId);
+            if (!cliente) return;
+
+            if (!cliente.unidades) {
+                cliente.unidades = {};
+            }
+
+            if (esBotellas) {
+                cliente.unidades[sku] = true;
+            } else {
+                delete cliente.unidades[sku];
+            }
         }
 
         function actualizarStatsCliente(clienteId) {
@@ -681,6 +694,7 @@
                 div.className = 'producto-item';
                 const cantidadActual = cliente.cantidades[prod.sku] || '';
                 const valorMostrar = cantidadActual ? String(cantidadActual).replace('.', ',') : '';
+                const esBotellas = cliente.unidades && cliente.unidades[prod.sku];
                 
                 div.innerHTML = `
                     <div class="producto-info">
@@ -692,7 +706,16 @@
                                inputmode="decimal"
                                value="${valorMostrar}" 
                                placeholder="0"
+                               data-cliente="${clienteId}"
+                               data-sku="${prod.sku}"
                                onchange="actualizarCantidadEspecial(${clienteId}, '${prod.sku}', this.value)">
+                        <div class="promo-checkbox">
+                            <input type="checkbox" 
+                                   id="unidad_${clienteId}_${prod.sku}"
+                                   ${esBotellas ? 'checked' : ''}
+                                   onchange="actualizarUnidadEspecial(${clienteId}, '${prod.sku}', this.checked)">
+                            <label for="unidad_${clienteId}_${prod.sku}" style="font-size: 10px; white-space: nowrap;">¿BOT?</label>
+                        </div>
                     </div>
                 `;
                 lista.appendChild(div);
@@ -797,10 +820,15 @@
                             clientesMap[item.codigo_cliente] = {
                                 id: Date.now() + Math.random(), // ID único
                                 codigo: item.codigo_cliente,
-                                cantidades: {}
+                                cantidades: {},
+                                unidades: {}
                             };
                         }
                         clientesMap[item.codigo_cliente].cantidades[item.sku] = item.cantidad;
+                        // Cargar si es botella o caja
+                        if (item.unidad_medida === 'BOT') {
+                            clientesMap[item.codigo_cliente].unidades[item.sku] = true;
+                        }
                     } else {
                         // Es pedido normal
                         cantidades[item.sku] = item.cantidad;
@@ -970,7 +998,8 @@
                         cantidad: cantidad,
                         promo: promos[sku] ? true : false,
                         es_especial: false,
-                        codigo_cliente: null
+                        codigo_cliente: null,
+                        unidad_medida: 'CJ'
                     };
                 });
             
@@ -981,6 +1010,7 @@
                     .filter(([_, cantidad]) => cantidad > 0)
                     .forEach(([sku, cantidad]) => {
                         const producto = productos.find(p => p.sku === sku);
+                        const esBotellas = cliente.unidades && cliente.unidades[sku];
                         productosEspeciales.push({
                             fecha: new Date().toLocaleDateString('es-CO'),
                             hora: new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }),
@@ -990,7 +1020,8 @@
                             cantidad: cantidad,
                             promo: false,
                             es_especial: true,
-                            codigo_cliente: cliente.codigo.trim()
+                            codigo_cliente: cliente.codigo.trim(),
+                            unidad_medida: esBotellas ? 'BOT' : 'CJ'
                         });
                     });
             });

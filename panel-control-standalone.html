@@ -538,13 +538,13 @@
                 </div>
             </div>
 
-            <!-- NUEVO: Detalle de Clientes Especiales por Ruta -->
+            <!-- NUEVO: Detalle de Clientes Especiales con Productos -->
             <div id="detalleClientesEspeciales" class="detalle-especiales hidden" style="margin-top: 20px; padding: 20px; background: #fffbeb; border: 2px solid #f59e0b; border-radius: 12px;">
                 <h3 style="color: #92400e; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
                     <span>💳</span>
-                    <span>Detalle de Clientes Especiales por Ruta</span>
+                    <span>Detalle de Clientes Especiales</span>
                 </h3>
-                <div id="listaClientesPorRuta"></div>
+                <div id="listaClientesDetallada"></div>
             </div>
         </div>
 
@@ -800,19 +800,78 @@
 
             // Mostrar/ocultar detalle de clientes especiales
             const detalleDiv = document.getElementById('detalleClientesEspeciales');
-            const listaDiv = document.getElementById('listaClientesPorRuta');
+            const listaDiv = document.getElementById('listaClientesDetallada');
 
             if (totalClientesEspeciales > 0) {
                 detalleDiv.classList.remove('hidden');
                 
-                // Generar lista de rutas con clientes especiales
-                const rutasConEspeciales = Object.keys(clientesPorRuta).sort();
-                listaDiv.innerHTML = rutasConEspeciales.map(ruta => {
-                    const numClientes = clientesPorRuta[ruta].size;
+                // Agrupar productos especiales por ruta y cliente
+                const clientesDetallados = {};
+                
+                todosPedidos.forEach(item => {
+                    if (item.es_especial && item.codigo_cliente) {
+                        const ruta = item.ruta;
+                        const cliente = item.codigo_cliente;
+                        const key = `${ruta}_${cliente}`;
+                        
+                        if (!clientesDetallados[key]) {
+                            clientesDetallados[key] = {
+                                ruta: ruta,
+                                cliente: cliente,
+                                fecha: item.fecha,
+                                hora: item.hora,
+                                productos: []
+                            };
+                        }
+                        
+                        clientesDetallados[key].productos.push({
+                            sku: item.sku,
+                            nombre: item.producto,
+                            cantidad: item.cantidad,
+                            unidad: item.unidad_medida || 'CJ'
+                        });
+                    }
+                });
+                
+                // Renderizar lista con detalles colapsables
+                const clientesArray = Object.values(clientesDetallados);
+                listaDiv.innerHTML = clientesArray.map((cliente, index) => {
+                    const totalCliente = cliente.productos.reduce((sum, p) => sum + p.cantidad, 0);
+                    const totalFormateado = (totalCliente % 1 === 0 ? totalCliente : totalCliente.toFixed(1)).toString().replace('.', ',');
+                    const clienteId = `cliente_detalle_${index}`;
+                    
                     return `
-                        <div class="ruta-especial-item">
-                            <div class="ruta-especial-nombre">📍 ${ruta}</div>
-                            <div class="ruta-especial-badge">${numClientes} cliente${numClientes > 1 ? 's' : ''}</div>
+                        <div class="cliente-especial-item" style="margin-bottom: 12px;">
+                            <div class="cliente-especial-header" onclick="toggleClienteDetalle('${clienteId}')">
+                                <div style="flex: 1;">
+                                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+                                        <span style="font-weight: 700; color: #92400e; font-size: 15px;">📍 ${cliente.ruta}</span>
+                                        <span style="font-weight: 700; color: #f59e0b;">→</span>
+                                        <span style="font-weight: 700; color: #1f2937;">👤 ${cliente.cliente}</span>
+                                    </div>
+                                    <div style="font-size: 12px; color: #666;">
+                                        ${cliente.fecha} - ${cliente.hora} • ${cliente.productos.length} producto(s) • ${totalFormateado} cajas
+                                    </div>
+                                </div>
+                                <span class="cliente-toggle" id="toggle_${clienteId}">▶</span>
+                            </div>
+                            <div class="cliente-productos" id="${clienteId}">
+                                ${cliente.productos.map(prod => {
+                                    const cantidadFormateada = prod.cantidad.toString().replace('.', ',');
+                                    return `
+                                    <div class="cliente-producto-item">
+                                        <div>
+                                            <div style="font-weight: 600; color: #1f2937;">${prod.nombre}</div>
+                                            <div style="font-size: 12px; color: #666;">SKU: ${prod.sku}</div>
+                                        </div>
+                                        <div style="display: flex; align-items: center; gap: 8px;">
+                                            <span style="font-weight: 700; color: #f59e0b; font-size: 16px;">${cantidadFormateada}</span>
+                                            <span style="font-size: 12px; color: #666; background: #fef3c7; padding: 2px 6px; border-radius: 4px; font-weight: 600;">${prod.unidad}</span>
+                                        </div>
+                                    </div>
+                                    `;
+                                }).join('')}
+                            </div>
                         </div>
                     `;
                 }).join('');
@@ -856,15 +915,9 @@
                 const productosNormales = pedido.productos.filter(p => !p.esEspecial);
                 const productosEspeciales = pedido.productos.filter(p => p.esEspecial);
                 
-                // Agrupar productos especiales por cliente
-                const clientesMap = {};
-                productosEspeciales.forEach(prod => {
-                    const codigo = prod.codigoCliente;
-                    if (!clientesMap[codigo]) {
-                        clientesMap[codigo] = [];
-                    }
-                    clientesMap[codigo].push(prod);
-                });
+                // Contar clientes únicos
+                const clientesUnicos = new Set(productosEspeciales.map(p => p.codigoCliente));
+                const numClientesEspeciales = clientesUnicos.size;
                 
                 const total = pedido.productos.reduce((sum, p) => sum + p.cantidad, 0);
                 const totalFormateado = (total % 1 === 0 ? total : total.toFixed(1)).toString().replace('.', ',');
@@ -886,7 +939,7 @@
                         
                         ${productosNormales.length > 0 ? `
                         <div class="productos-list">
-                            <div style="font-weight: 600; color: #666; margin-bottom: 10px; font-size: 13px;">📦 Pedido Normal</div>
+                            <div style="font-weight: 600; color: #666; margin-bottom: 10px; font-size: 13px;">📦 Pedido Normal (${productosNormales.length} productos)</div>
                             ${productosNormales.map(prod => {
                                 const cantidadFormateada = prod.cantidad.toString().replace('.', ',');
                                 return `
@@ -903,44 +956,14 @@
                         </div>
                         ` : ''}
                         
-                        ${Object.keys(clientesMap).length > 0 ? `
-                        <div class="productos-list" style="margin-top: ${productosNormales.length > 0 ? '15px' : '0'};">
-                            <div style="font-weight: 600; color: #f59e0b; margin-bottom: 10px; font-size: 13px;">💳 Clientes Especiales</div>
-                            ${Object.entries(clientesMap).map(([codigo, prods]) => {
-                                const totalCliente = prods.reduce((sum, p) => sum + p.cantidad, 0);
-                                const totalClienteFormateado = (totalCliente % 1 === 0 ? totalCliente : totalCliente.toFixed(1)).toString().replace('.', ',');
-                                const clienteId = `cliente_${pedido.ruta}_${pedido.fecha}_${codigo}`.replace(/[^a-zA-Z0-9_]/g, '_');
-                                
-                                return `
-                                <div class="cliente-especial-item">
-                                    <div class="cliente-especial-header" onclick="toggleClienteDetalle('${clienteId}')">
-                                        <div>
-                                            <span class="cliente-codigo">👤 Cliente: ${codigo}</span>
-                                            <span style="color: #666; font-size: 13px; margin-left: 10px;">${prods.length} producto(s) • ${totalClienteFormateado} cajas</span>
-                                        </div>
-                                        <span class="cliente-toggle" id="toggle_${clienteId}">▶</span>
-                                    </div>
-                                    <div class="cliente-productos" id="${clienteId}">
-                                        ${prods.map(prod => {
-                                            const cantidadFormateada = prod.cantidad.toString().replace('.', ',');
-                                            const unidad = prod.unidadMedida || 'CJ';
-                                            return `
-                                            <div class="cliente-producto-item">
-                                                <div>
-                                                    <div style="font-weight: 600; color: #1f2937;">${prod.nombre}</div>
-                                                    <div style="font-size: 12px; color: #666;">SKU: ${prod.sku}</div>
-                                                </div>
-                                                <div style="display: flex; align-items: center; gap: 8px;">
-                                                    <span style="font-weight: 700; color: #f59e0b; font-size: 16px;">${cantidadFormateada}</span>
-                                                    <span style="font-size: 12px; color: #666; background: #fef3c7; padding: 2px 6px; border-radius: 4px;">${unidad}</span>
-                                                </div>
-                                            </div>
-                                            `;
-                                        }).join('')}
-                                    </div>
-                                </div>
-                                `;
-                            }).join('')}
+                        ${numClientesEspeciales > 0 ? `
+                        <div class="productos-list" style="margin-top: ${productosNormales.length > 0 ? '15px' : '0'}; background: #fffbeb; border: 2px solid #f59e0b;">
+                            <div style="font-weight: 600; color: #f59e0b; margin-bottom: 8px; font-size: 13px;">💳 Clientes Especiales</div>
+                            <div style="background: #fef3c7; padding: 10px; border-radius: 6px; text-align: center;">
+                                <div style="font-size: 18px; font-weight: 700; color: #92400e;">${numClientesEspeciales}</div>
+                                <div style="font-size: 12px; color: #78350f;">cliente${numClientesEspeciales > 1 ? 's' : ''} con pedido${numClientesEspeciales > 1 ? 's' : ''} especial${numClientesEspeciales > 1 ? 'es' : ''}</div>
+                                <div style="font-size: 11px; color: #92400e; margin-top: 5px;">👆 Ver detalle arriba en "Clientes Especiales"</div>
+                            </div>
                         </div>
                         ` : ''}
                     </div>

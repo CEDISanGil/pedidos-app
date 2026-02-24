@@ -7,27 +7,32 @@
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --orange: #f97316;
-    --dark: #1a1a1a;
-    --card: #242424;
-    --border: #333;
-    --text: #f0f0f0;
+    --orange: #E30613;
+    --dark: #111;
+    --card: #ffffff;
+    --border: #e0e0e0;
+    --text: #111111;
     --muted: #888;
-    --green: #22c55e;
-    --yellow: #f59e0b;
-    --red: #ef4444;
-    --input-bg: #2e2e2e;
+    --green: #16a34a;
+    --yellow: #b45309;
+    --red: #dc2626;
+    --input-bg: #f7f7f7;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  body { background: var(--dark); color: var(--text); font-family: 'Barlow', sans-serif; min-height: 100vh; padding-bottom: 30px; }
+  body { background: #f5f5f5; color: var(--text); font-family: 'Barlow', sans-serif; min-height: 100vh; padding-bottom: 30px; }
 
   .header {
-    background: var(--orange);
-    padding: 16px 20px 14px;
+    background: linear-gradient(135deg, #f40009 0%, #c8000a 100%);
     position: sticky; top: 0; z-index: 100;
+    min-height: 130px; display: flex; align-items: center; justify-content: center; overflow: hidden;
+    flex-direction: column; padding: 0;
   }
-  .header-logo { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 800; color: white; }
-  .header-sub { font-size: 11px; color: rgba(255,255,255,0.8); letter-spacing: 2px; text-transform: uppercase; }
+  .header img.logo { width: 100%; height: 130px; object-fit: cover; object-position: center; display: block; position: absolute; top: 0; left: 0; }
+  .header-logo { display: none; }
+  .header-sub { position: absolute; bottom: 0; left: 0; right: 0; z-index: 2;
+    background: rgba(160,0,0,0.70); color: white;
+    font-size: 13px; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; padding: 6px 0; text-align: center; opacity: 1; }
 
   .tabs { display: flex; padding: 16px 16px 0; gap: 8px; }
   .tab {
@@ -66,7 +71,7 @@
     letter-spacing: 1px; padding: 4px 10px; border-radius: 20px;
   }
   .status-pendiente { background: rgba(245,158,11,0.15); color: var(--yellow); border: 1px solid rgba(245,158,11,0.3); }
-  .status-verificado { background: rgba(34,197,94,0.15); color: var(--green); border: 1px solid rgba(34,197,94,0.3); }
+  .status-verificado { background: rgba(34,197,94,0.15); color: var(--green); border: 1px solid rgba(22,163,74,0.3); }
   .dev-meta { font-size: 12px; color: var(--muted); margin-top: 4px; }
   .dev-count { font-size: 13px; color: var(--text); margin-top: 6px; }
 
@@ -93,11 +98,11 @@
     background: var(--card); border: 1.5px solid var(--border);
     border-radius: 12px; padding: 12px 14px; margin: 0 16px 8px;
   }
-  .prod-row.over-limit { border-color: var(--yellow); background: #2a2010; }
+  .prod-row.over-limit { border-color: var(--yellow); background: #fffbeb; }
   .prod-row-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
   .prod-row-sku { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; color: var(--muted); }
   .prod-row-nombre { font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 700; }
-  .cargado-info { font-size: 11px; color: var(--green); background: rgba(34,197,94,0.1); padding: 2px 8px; border-radius: 10px; }
+  .cargado-info { font-size: 11px; color: var(--green); background: rgba(22,163,74,0.1); padding: 2px 8px; border-radius: 10px; }
 
   .prod-row-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .input-group label { display: block; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
@@ -128,8 +133,8 @@
     font-size: 13px; display: none;
   }
   .alert.visible { display: block; }
-  .alert-success { background: #162616; border: 1px solid #2d5a2d; color: #86efac; }
-  .alert-error { background: #2a0f0f; border: 1px solid #7f1d1d; color: #fca5a5; }
+  .alert-success { background: #f0fdf4; border: 1px solid #86efac; color: #166534; }
+  .alert-error { background: #fef2f2; border: 1px solid #fca5a5; color: #991b1b; }
 
   .empty { text-align: center; padding: 40px 20px; color: var(--muted); font-size: 14px; }
   .empty-icon { font-size: 40px; margin-bottom: 10px; }
@@ -147,14 +152,14 @@
   }
   .refresh-btn:active { border-color: var(--orange); color: var(--orange); }
 
-  .verified-already { text-align: center; padding: 12px; margin: 0 16px; background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); border-radius: 10px; color: var(--green); font-size: 13px; display: none; }
+  .verified-already { text-align: center; padding: 12px; margin: 0 16px; background: rgba(22,163,74,0.1); border: 1px solid rgba(34,197,94,0.3); border-radius: 10px; color: var(--green); font-size: 13px; display: none; }
   .verified-already.visible { display: block; }
 </style>
 </head>
 <body>
 
 <div class="header">
-  <div class="header-logo">EUCARIO — CEDI</div>
+  <img class="logo" src="https://cedisangil.github.io/pedidos-app/nuevo-logo.png" alt="CEDI San Gil">
   <div class="header-sub">Verificación de Devoluciones</div>
 </div>
 

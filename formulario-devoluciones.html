@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Devoluciones - CEDI San Gil</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { background: #f5f5f5; color: #1a1a1a; font-family: 'Roboto', sans-serif; min-height: 100vh; padding-bottom: 100px; }
+
+  .header {
+    background: linear-gradient(135deg, #f40009 0%, #c8000a 100%);
+    text-align: center; position: relative;
+    min-height: 140px; display: flex; align-items: center; justify-content: center; overflow: hidden;
+  }
+  .header img.logo { width: 100%; height: 140px; object-fit: cover; object-position: center; display: block; }
+  .header-title {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: rgba(160,0,0,0.70); color: white;
+    font-size: 13px; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; padding: 6px 0; text-align: center;
+  }
+
+  .section { padding: 14px 14px 0; }
+  .section-label { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #888; margin-bottom: 6px; }
+
+  .select-wrap { position: relative; }
+  .select-wrap::after { content: '▾'; position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: #888; pointer-events: none; }
+  select {
+    width: 100%; background: white; border: 1.5px solid #ddd;
+    color: #1a1a1a; font-family: 'Roboto', sans-serif; font-size: 15px;
+    padding: 12px 14px; border-radius: 8px;
+    appearance: none; -webkit-appearance: none; outline: none;
+  }
+  select:focus { border-color: #E30613; }
+
+  .pedido-banner {
+    margin: 12px 14px 0; background: #f0fdf4; border: 1.5px solid #86efac;
+    border-radius: 8px; padding: 10px 14px; display: none;
+  }
+  .pedido-banner.visible { display: block; }
+  .pedido-banner-title { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #16a34a; margin-bottom: 2px; }
+  .pedido-banner-text { font-size: 13px; color: #166534; }
+
+  .no-pedido-banner {
+    margin: 12px 14px 0; background: #fffbeb; border: 1.5px solid #fcd34d;
+    border-radius: 8px; padding: 10px 14px; display: none; text-align: center;
+  }
+  .no-pedido-banner.visible { display: block; }
+  .no-pedido-banner p { color: #92400e; font-size: 13px; }
+
+  .alert { margin: 12px 14px 0; padding: 12px 14px; border-radius: 8px; font-size: 13px; display: none; }
+  .alert.visible { display: block; }
+  .alert-success { background: #f0fdf4; border: 1.5px solid #86efac; color: #166534; }
+  .alert-error   { background: #fef2f2; border: 1.5px solid #fca5a5; color: #991b1b; }
+
+  /* TÍTULOS DE SECCIÓN */
+  .prod-section-title {
+    font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+    color: #888; padding: 16px 14px 4px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .prod-section-title::after { content: ''; flex: 1; height: 1px; background: #e0e0e0; }
+
+  /* CABECERA CAJAS / BOTELLAS */
+  .col-header { display: flex; align-items: center; padding: 2px 14px 6px; }
+  .col-header-left { flex: 1; }
+  .col-header-right { display: flex; gap: 6px; width: 144px; flex-shrink: 0; }
+  .col-label { flex: 1; text-align: center; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #E30613; }
+
+  /* FILA DE PRODUCTO */
+  .prod-card {
+    display: flex; align-items: center;
+    background: white; border: 1.5px solid #e8e8e8;
+    border-radius: 8px; margin: 0 14px 6px;
+    padding: 9px 10px; transition: border-color 0.15s;
+  }
+  .prod-card.has-value  { border-color: #E30613; }
+  .prod-card.over-limit { border-color: #f59e0b; background: #fffbeb; }
+
+  .prod-info { flex: 1; min-width: 0; padding-right: 8px; }
+  .prod-sku  { font-size: 11px; color: #aaa; font-weight: 500; line-height: 1; }
+  .prod-name { font-size: 13px; font-weight: 700; color: #111; line-height: 1.25; margin-top: 2px; }
+  .prod-cargado { font-size: 10px; color: #16a34a; margin-top: 3px; }
+
+  .prod-inputs { display: flex; gap: 6px; width: 144px; flex-shrink: 0; }
+  .prod-inputs input {
+    width: 66px; background: #f7f7f7; border: 1.5px solid #ddd;
+    color: #111; font-family: 'Roboto', sans-serif;
+    font-size: 22px; font-weight: 700;
+    padding: 7px 4px; border-radius: 6px; text-align: center;
+    outline: none; -webkit-appearance: none; appearance: none;
+  }
+  .prod-inputs input:focus { border-color: #E30613; background: white; }
+  .prod-inputs input.over { border-color: #f59e0b; color: #b45309; background: #fffbeb; }
+
+  .over-warning-row {
+    display: none; background: #fffbeb; border-left: 3px solid #f59e0b;
+    margin: -4px 14px 6px; border-radius: 0 0 6px 6px;
+    padding: 4px 12px; font-size: 11px; color: #92400e;
+  }
+  .over-warning-row.visible { display: block; }
+
+  /* RESUMEN */
+  .resumen {
+    margin: 14px 14px 0; background: white;
+    border: 1.5px solid #e8e8e8; border-radius: 8px; padding: 14px; display: none;
+  }
+  .resumen.visible { display: block; }
+  .resumen-title { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #888; margin-bottom: 10px; }
+  .resumen-item { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #f0f0f0; font-size: 13px; color: #333; }
+  .resumen-item:last-child { border-bottom: none; }
+  .resumen-qty { font-weight: 700; color: #E30613; }
+
+  /* BTN ENVIAR */
+  .btn-enviar-wrap {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    padding: 12px 14px 18px;
+    background: linear-gradient(transparent, #f5f5f5 30%);
+  }
+  .btn-enviar {
+    width: 100%; padding: 16px; background: #E30613; color: white;
+    font-family: 'Roboto', sans-serif; font-size: 16px; font-weight: 700;
+    letter-spacing: 1px; text-transform: uppercase;
+    border: none; border-radius: 10px; cursor: pointer;
+    box-shadow: 0 4px 14px rgba(227,6,19,0.35);
+    transition: transform 0.1s, opacity 0.2s;
+  }
+  .btn-enviar:active   { transform: scale(0.98); }
+  .btn-enviar:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+
+  .loading { text-align: center; padding: 20px; color: #888; font-size: 13px; display: none; }
+  .loading.visible { display: block; }
+  .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid #ddd; border-top-color: #E30613; border-radius: 50%; animation: spin 0.6s linear infinite; margin-right: 6px; vertical-align: middle; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <img class="logo" src="https://cedisangil.github.io/pedidos-app/Logo_Coca_cola.jpg" alt="Coca-Cola CEDI San Gil">
+  <div class="header-title">Registro de Devoluciones</div>
+</div>
+
+<div class="section" style="margin-top:14px;">
+  <div class="section-label">Selecciona tu ruta</div>
+  <div class="select-wrap">
+    <select id="selectRuta" onchange="cargarPedidoAnterior()">
+      <option value="">-- Seleccionar ruta --</option>
+      <option>SG1903</option>
+      <option>SG1904</option>
+      <option>SG1905</option>
+      <option>SG10o6</option>
+      <option>SG1907</option>
+      <option>SG1908</option>
+      <option>SG1951</option>
+      <option>SG1952</option>
+      <option>SG1953</option>
+      <option disabled>──── Adicionales ────</option>
+      <option>SG1903-1</option>
+      <option>SG1904-1</option>
+      <option>SG1905-1</option>
+      <option>SG10o6-1</option>
+      <option>SG1907-1</option>
+      <option>SG1908-1</option>
+      <option>SG1951-1</option>
+      <option>SG1952-1</option>
+      <option>SG1953-1</option>
+    </select>
+  </div>
+</div>
+
+<div class="loading" id="loadingPedido"><span class="spinner"></span>Buscando pedido cargado...</div>
+
+<div class="pedido-banner" id="pedidoBanner">
+  <div class="pedido-banner-title">✓ Pedido encontrado</div>
+  <div class="pedido-banner-text" id="pedidoBannerText"></div>
+</div>
+<div class="no-pedido-banner" id="noPedidoBanner">
+  <p>⚠️ No se encontró pedido anterior para esta ruta.<br>Solo podrás registrar envases y canastas.</p>
+</div>
+
+<div class="alert alert-success" id="alertSuccess">✅ Devolución enviada correctamente. ¡Gracias!</div>
+<div class="alert alert-error"   id="alertError"></div>
+
+<div id="productosLista"></div>
+
+<div class="resumen" id="resumen">
+  <div class="resumen-title">Resumen de devolución</div>
+  <div id="resumenItems"></div>
+</div>
+
+<div class="btn-enviar-wrap">
+  <button class="btn-enviar" id="btnEnviar" onclick="enviarDevolucion()" disabled>Enviar Devolución</button>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://etxtmdljkxdaonyldcmn.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV0eHRtZGxqa3hkYW9ueWxkY21uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0NDE1OTAsImV4cCI6MjA3OTAxNzU5MH0.SII1FIsgyuSv1oI1_xJs_MOUvYxNTnJsBEXigbZsosk';
+
+const ENVASES_FIJOS = [
+  { sku: '184017', nombre: 'Envase CC 350' },
+  { sku: '183303', nombre: 'Envase CC 8 onz' },
+  { sku: '183391', nombre: 'Envase 1 lt vidrio' },
+  { sku: '184018', nombre: 'Envase RP CC 2lt' },
+  { sku: '183307', nombre: 'Envase Quatro 8 onz' },
+  { sku: '184019', nombre: 'Envase Quatro 350' },
+  { sku: '184020', nombre: 'Envase Sprite 350' },
+  { sku: '184002', nombre: 'Botellón vacío' },
+  { sku: '184008', nombre: 'Canasta 30 unid' },
+  { sku: '184009', nombre: 'Canasta 12 unid' },
+  { sku: '184010', nombre: 'Canasta 9 unid' },
+  { sku: '183502', nombre: 'Canasta roja VTM' },
+  { sku: '184003', nombre: 'Canasta azul KOF' },
+  { sku: '197826', nombre: 'Estiba normal' },
+  { sku: '183511', nombre: 'Estiba Verde' },
+  { sku: '197812', nombre: 'Estiba Azul' },
+  { sku: '197794', nombre: 'Rack botellones' },
+];
+
+let productosDelPedido = [];
+let valoresDevolucion  = {};
+
+async function cargarPedidoAnterior() {
+  const ruta = document.getElementById('selectRuta').value;
+  if (!ruta) return;
+
+  productosDelPedido = [];
+  valoresDevolucion  = {};
+  document.getElementById('productosLista').innerHTML = '';
+  document.getElementById('pedidoBanner').classList.remove('visible');
+  document.getElementById('noPedidoBanner').classList.remove('visible');
+  document.getElementById('resumen').classList.remove('visible');
+  document.getElementById('alertSuccess').classList.remove('visible');
+  document.getElementById('alertError').classList.remove('visible');
+  document.getElementById('btnEnviar').disabled = true;
+  document.getElementById('loadingPedido').classList.add('visible');
+
+  try {
+    const res  = await fetch(
+      `${SUPABASE_URL}/rest/v1/pedidos_historico?ruta=eq.${ruta}&order=fecha.desc,hora.desc&limit=50`,
+      { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }
+    );
+    const data = await res.json();
+    document.getElementById('loadingPedido').classList.remove('visible');
+
+    if (data && data.length > 0) {
+      const fechaRef = data[0].fecha;
+      const horaRef  = data[0].hora;
+      productosDelPedido = data.filter(d => d.fecha === fechaRef && d.hora === horaRef);
+      document.getElementById('pedidoBannerText').textContent =
+        `Ruta ${ruta} — Pedido del ${fechaRef} a las ${horaRef} (${productosDelPedido.length} productos)`;
+      document.getElementById('pedidoBanner').classList.add('visible');
+    } else {
+      document.getElementById('noPedidoBanner').classList.add('visible');
+    }
+  } catch(e) {
+    document.getElementById('loadingPedido').classList.remove('visible');
+    document.getElementById('noPedidoBanner').classList.add('visible');
+  }
+
+  renderProductos();
+}
+
+function renderProductos() {
+  const c = document.getElementById('productosLista');
+  c.innerHTML = '';
+
+  if (productosDelPedido.length > 0) {
+    c.appendChild(mkTitle('Productos del pedido cargado'));
+    c.appendChild(mkColHeader());
+    productosDelPedido.forEach(p => {
+      initVal(p.sku, p.producto, p.cajas ?? null, p.botellas ?? null, false);
+      const { row, warn } = mkFila(p.sku, p.producto, p.cajas, p.botellas);
+      c.appendChild(row); c.appendChild(warn);
+    });
+  }
+
+  c.appendChild(mkTitle('Envases, Canastas y Estibas'));
+  c.appendChild(mkColHeader());
+  ENVASES_FIJOS.forEach(e => {
+    initVal(e.sku, e.nombre, null, null, true);
+    const { row, warn } = mkFila(e.sku, e.nombre, null, null);
+    c.appendChild(row); c.appendChild(warn);
+  });
+
+  document.getElementById('btnEnviar').disabled = false;
+}
+
+function initVal(sku, nombre, cCajas, cBot, esEnvase) {
+  if (!valoresDevolucion[sku])
+    valoresDevolucion[sku] = { nombre, cajas: '', botellas: '', cargadoCajas: cCajas, cargadoBotellas: cBot, esEnvase };
+}
+
+function mkTitle(txt) {
+  const d = document.createElement('div');
+  d.className = 'prod-section-title'; d.textContent = txt; return d;
+}
+
+function mkColHeader() {
+  const d = document.createElement('div');
+  d.className = 'col-header';
+  d.innerHTML = `<div class="col-header-left"></div>
+    <div class="col-header-right">
+      <div class="col-label">Cajas</div>
+      <div class="col-label">Botellas</div>
+    </div>`;
+  return d;
+}
+
+function mkFila(sku, nombre, cargCajas, cargBot) {
+  const cargText = (cargCajas || cargBot)
+    ? `Cargó: ${cargCajas ? cargCajas+' Cj' : ''}${cargCajas && cargBot ? ' · ' : ''}${cargBot ? cargBot+' Bt' : ''}`
+    : '';
+
+  const row = document.createElement('div');
+  row.className = 'prod-card';
+  row.id = `card-${sku}`;
+  row.innerHTML = `
+    <div class="prod-info">
+      <div class="prod-sku">${sku}</div>
+      <div class="prod-name">${nombre}</div>
+      ${cargText ? `<div class="prod-cargado">▲ ${cargText}</div>` : ''}
+    </div>
+    <div class="prod-inputs">
+      <input type="number" inputmode="numeric" min="0" id="cajas-${sku}" placeholder="0"
+        value="${valoresDevolucion[sku]?.cajas || ''}"
+        oninput="upd('${sku}','cajas',this.value)">
+      <input type="number" inputmode="numeric" min="0" id="botellas-${sku}" placeholder="0"
+        value="${valoresDevolucion[sku]?.botellas || ''}"
+        oninput="upd('${sku}','botellas',this.value)">
+    </div>`;
+
+  const warn = document.createElement('div');
+  warn.className = 'over-warning-row';
+  warn.id = `warn-${sku}`;
+  warn.textContent = '⚠️ La cantidad supera lo que fue cargado';
+  return { row, warn };
+}
+
+function upd(sku, campo, valor) {
+  if (!valoresDevolucion[sku]) return;
+  valoresDevolucion[sku][campo] = valor === '' ? '' : parseInt(valor) || 0;
+
+  const v   = valoresDevolucion[sku];
+  const cj  = parseInt(v.cajas)    || 0;
+  const bt  = parseInt(v.botellas) || 0;
+  const over = (v.cargadoCajas    !== null && cj > (v.cargadoCajas    || 0))
+            || (v.cargadoBotellas !== null && bt > (v.cargadoBotellas || 0));
+
+  document.getElementById(`card-${sku}`)?.classList.toggle('over-limit', over);
+  document.getElementById(`card-${sku}`)?.classList.toggle('has-value',  (cj>0||bt>0) && !over);
+  document.getElementById(`cajas-${sku}`)?.classList.toggle('over',    v.cargadoCajas    !== null && cj > (v.cargadoCajas    || 0));
+  document.getElementById(`botellas-${sku}`)?.classList.toggle('over', v.cargadoBotellas !== null && bt > (v.cargadoBotellas || 0));
+  document.getElementById(`warn-${sku}`)?.classList.toggle('visible', over);
+
+  resumen();
+}
+
+function resumen() {
+  const items = Object.entries(valoresDevolucion).filter(([,v]) => parseInt(v.cajas)>0 || parseInt(v.botellas)>0);
+  const el = document.getElementById('resumen');
+  if (!items.length) { el.classList.remove('visible'); return; }
+  el.classList.add('visible');
+  document.getElementById('resumenItems').innerHTML = items.map(([,v]) =>
+    `<div class="resumen-item"><span>${v.nombre}</span>
+     <span class="resumen-qty">${parseInt(v.cajas)>0?parseInt(v.cajas)+' Cj ':''} ${parseInt(v.botellas)>0?parseInt(v.botellas)+' Bt':''}</span></div>`
+  ).join('');
+}
+
+async function enviarDevolucion() {
+  const ruta = document.getElementById('selectRuta').value;
+  if (!ruta) { err('Por favor selecciona tu ruta.'); return; }
+
+  const items = Object.entries(valoresDevolucion).filter(([,v]) => parseInt(v.cajas)>0 || parseInt(v.botellas)>0);
+  if (!items.length) { err('No has digitado ninguna cantidad a devolver.'); return; }
+
+  const hayOver = items.some(([,v]) =>
+    (v.cargadoCajas    !== null && (parseInt(v.cajas)||0)    > (v.cargadoCajas||0))  ||
+    (v.cargadoBotellas !== null && (parseInt(v.botellas)||0) > (v.cargadoBotellas||0))
+  );
+  if (hayOver) { err('⚠️ Hay cantidades que superan lo cargado. Corrígelas antes de enviar.'); return; }
+
+  const btn = document.getElementById('btnEnviar');
+  btn.disabled = true; btn.textContent = 'Enviando...';
+
+  const ahora = new Date();
+  const fecha = `${String(ahora.getDate()).padStart(2,'0')}/${String(ahora.getMonth()+1).padStart(2,'0')}/${ahora.getFullYear()}`;
+  const hora  = ahora.toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit',hour12:true});
+
+  const body = items.map(([sku,v]) => ({
+    fecha, hora, ruta, sku, producto: v.nombre,
+    cajas_devueltas: parseInt(v.cajas)||0,
+    botellas_devueltas: parseInt(v.botellas)||0,
+    cajas_cargadas: v.cargadoCajas,
+    botellas_cargadas: v.cargadoBotellas,
+    estado: 'pendiente', es_envase: v.esEnvase
+  }));
+
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/devoluciones`, {
+      method:'POST',
+      headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body: JSON.stringify(body)
+    });
+    if (!res.ok) throw new Error(await res.text());
+
+    document.getElementById('alertSuccess').classList.add('visible');
+    document.getElementById('alertError').classList.remove('visible');
+    document.getElementById('productosLista').innerHTML = '';
+    document.getElementById('resumen').classList.remove('visible');
+    document.getElementById('pedidoBanner').classList.remove('visible');
+    document.getElementById('noPedidoBanner').classList.remove('visible');
+    document.getElementById('selectRuta').value = '';
+    productosDelPedido=[]; valoresDevolucion={};
+    window.scrollTo(0,0);
+  } catch(e) { err('Error al enviar: '+e.message); }
+  finally { btn.disabled=false; btn.textContent='Enviar Devolución'; }
+}
+
+function err(msg) {
+  const el = document.getElementById('alertError');
+  el.textContent = '❌ '+msg; el.classList.add('visible');
+  el.scrollIntoView({behavior:'smooth',block:'center'});
+}
+</script>
+</body>
+</html>

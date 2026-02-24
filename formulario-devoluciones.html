@@ -246,8 +246,12 @@ async function cargarPedidoAnterior() {
     document.getElementById('loadingPedido').classList.remove('visible');
 
     if (data && data.length > 0) {
-      const fechaRef = data[0].fecha;
-      const horaRef  = data[0].hora;
+      // Buscar el pedido más reciente que NO sea de hoy (para rutas diarias y rutas de pocos días)
+      const ahora = new Date();
+      const hoy = String(ahora.getDate()).padStart(2,'0') + '/' + String(ahora.getMonth()+1).padStart(2,'0') + '/' + ahora.getFullYear();
+      const pedidoAnterior = data.find(d => d.fecha !== hoy);
+      const fechaRef = pedidoAnterior ? pedidoAnterior.fecha : data[0].fecha;
+      const horaRef  = pedidoAnterior ? pedidoAnterior.hora  : data[0].hora;
       productosDelPedido = data.filter(d => d.fecha === fechaRef && d.hora === horaRef);
       document.getElementById('pedidoBannerText').textContent =
         `Ruta ${ruta} — Pedido del ${fechaRef} a las ${horaRef} (${productosDelPedido.length} productos)`;

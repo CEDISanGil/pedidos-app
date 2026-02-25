@@ -410,16 +410,16 @@ function descargarExcelGrupo(ruta, fecha, hora) {
 }
 
 function exportarExcel(datos, nombre) {
-  const ws_data = [
-    ['Fecha','Hora','Ruta','SKU','Producto','Cajas Cargadas','Botellas Cargadas','Cajas Devueltas','Botellas Devueltas','Estado'],
-    ...datos.map(d => [d.fecha, d.hora, d.ruta, d.sku, d.producto,
-      d.cajas_cargadas ?? '', d.botellas_cargadas ?? '',
-      d.cajas_devueltas ?? 0, d.botellas_devueltas ?? 0,
-      d.estado.toUpperCase()])
-  ];
+  const filas = [['SKU', 'Cantidad', 'Cajas o Bot (1=Caja / 2=Bot)']];
+  datos.forEach(d => {
+    const cajas = parseInt(d.cajas_devueltas) || 0;
+    const bots  = parseInt(d.botellas_devueltas) || 0;
+    if (cajas > 0) filas.push([d.sku, cajas, 1]);
+    if (bots  > 0) filas.push([d.sku, bots,  2]);
+  });
   const wb = XLSX.utils.book_new();
-  const ws = XLSX.utils.aoa_to_sheet(ws_data);
-  ws['!cols'] = [{wch:12},{wch:10},{wch:10},{wch:10},{wch:30},{wch:14},{wch:16},{wch:14},{wch:16},{wch:12}];
+  const ws = XLSX.utils.aoa_to_sheet(filas);
+  ws['!cols'] = [{wch:12},{wch:12},{wch:26}];
   XLSX.utils.book_append_sheet(wb, ws, 'Devoluciones');
   XLSX.writeFile(wb, nombre + '.xlsx');
 }

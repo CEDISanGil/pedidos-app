@@ -80,9 +80,9 @@
   .prod-card.over-limit { border-color: #f59e0b; background: #fffbeb; }
 
   .prod-info { flex: 1; min-width: 0; padding-right: 8px; }
-  .prod-sku  { font-size: 22px; color: #aaa; font-weight: 500; line-height: 1; }
-  .prod-name { font-size: 26px; font-weight: 700; color: #111; line-height: 1.25; margin-top: 2px; }
-  .prod-cargado { font-size: 30px; color: #16a34a; margin-top: 3px; font-weight: 700; }
+  .prod-sku  { font-size: 16px; color: #aaa; font-weight: 500; line-height: 1; }
+  .prod-name { font-size: 20px; font-weight: 700; color: #111; line-height: 1.25; margin-top: 2px; }
+  .prod-cargado { font-size: 21px; color: #16a34a; margin-top: 3px; font-weight: 700; }
 
   .prod-inputs { display: flex; gap: 6px; width: 144px; flex-shrink: 0; }
   .prod-inputs input {
@@ -134,6 +134,24 @@
   .loading.visible { display: block; }
   .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid #ddd; border-top-color: #E30613; border-radius: 50%; animation: spin 0.6s linear infinite; margin-right: 6px; vertical-align: middle; }
   @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* BUSCADOR */
+  .buscador-wrap { padding: 8px 14px 0; display: none; }
+  .buscador-wrap.visible { display: block; }
+  .buscador-wrap input {
+    width: 100%; background: white; border: 1.5px solid #ddd;
+    color: #111; font-family: 'Roboto', sans-serif; font-size: 15px;
+    padding: 10px 14px 10px 38px; border-radius: 8px; outline: none;
+  }
+  .buscador-wrap input:focus { border-color: #E30613; }
+  .buscador-wrap .search-icon {
+    position: relative;
+  }
+  .buscador-wrap .search-icon::before {
+    content: '🔍'; position: absolute; left: 12px; top: 50%;
+    transform: translateY(-50%); font-size: 14px; pointer-events: none;
+    z-index: 1;
+  }
 </style>
 </head>
 <body>
@@ -143,7 +161,7 @@
   <div class="header-title">Registro de Devoluciones</div>
 </div>
 
-<div class="section" style="margin-top:14px;">
+<div class="section" style="margin-top:4px;">
   <div class="section-label">Selecciona tu ruta</div>
   <div class="select-wrap">
     <select id="selectRuta" onchange="cargarPedidoAnterior()">
@@ -183,6 +201,12 @@
 
 <div class="alert alert-success" id="alertSuccess">✅ Devolución enviada correctamente. ¡Gracias!</div>
 <div class="alert alert-error"   id="alertError"></div>
+
+<div class="buscador-wrap" id="buscadorWrap">
+  <div class="search-icon">
+    <input type="text" id="inputBuscar" placeholder="Buscar por SKU o nombre..." oninput="filtrarProductos(this.value)">
+  </div>
+</div>
 
 <div id="productosLista"></div>
 
@@ -290,6 +314,8 @@ function renderProductos() {
   });
 
   document.getElementById('btnEnviar').disabled = false;
+  document.getElementById('buscadorWrap').classList.add('visible');
+  document.getElementById('inputBuscar').value = '';
 }
 
 function initVal(sku, nombre, cCajas, cBot, esEnvase) {
@@ -416,6 +442,7 @@ async function enviarDevolucion() {
     document.getElementById('resumen').classList.remove('visible');
     document.getElementById('pedidoBanner').classList.remove('visible');
     document.getElementById('noPedidoBanner').classList.remove('visible');
+    document.getElementById('buscadorWrap').classList.remove('visible');
     document.getElementById('selectRuta').value = '';
     productosDelPedido=[]; valoresDevolucion={};
     window.scrollTo(0,0);
@@ -427,6 +454,24 @@ function err(msg) {
   const el = document.getElementById('alertError');
   el.textContent = '❌ '+msg; el.classList.add('visible');
   el.scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+function filtrarProductos(query) {
+  const q = query.toLowerCase().trim();
+  document.querySelectorAll('.prod-card').forEach(card => {
+    const id = card.id.replace('card-', '');
+    const v = valoresDevolucion[id];
+    if (!v) return;
+    const match = !q || v.nombre.toLowerCase().includes(q) || id.toLowerCase().includes(q);
+    card.style.display = match ? '' : 'none';
+    // Also hide/show the warning row below
+    const warn = document.getElementById('warn-' + id);
+    if (warn) warn.style.display = match ? '' : 'none';
+  });
+  // Hide/show section titles and col headers based on visible cards
+  document.querySelectorAll('.prod-section-title, .col-header').forEach(el => {
+    el.style.display = '';
+  });
 }
 </script>
 </body>

@@ -9,164 +9,153 @@
 <style>
   :root {
     --accent: #E30613;
-    --accent2: #f97316;
-    --dark: #111;
-    --surface: #1a1a1a;
-    --card: #202020;
-    --border: #2e2e2e;
-    --text: #f0f0f0;
-    --muted: #777;
-    --green: #22c55e;
-    --yellow: #f59e0b;
+    --surface: #f5f5f5;
+    --card: #ffffff;
+    --border: #e0e0e0;
+    --text: #111;
+    --muted: #888;
+    --green: #16a34a;
+    --yellow: #b45309;
+    --red: #dc2626;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--dark); color: var(--text); font-family: 'Barlow', sans-serif; min-height: 100vh; }
+  body { background: var(--surface); color: var(--text); font-family: 'Barlow', sans-serif; min-height: 100vh; }
 
-  /* TOP BAR */
+  /* TOPBAR */
   .topbar {
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 0 32px;
-    display: flex; align-items: center; justify-content: space-between;
-    height: 60px;
+    background: white; border-bottom: 1px solid var(--border);
+    padding: 0 28px; display: flex; align-items: center; justify-content: space-between; height: 64px;
   }
-  .logo { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 900; letter-spacing: 2px; }
-  .logo span { color: var(--accent); }
-  .logo-sub { font-size: 11px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-left: 12px; }
-  .topbar-right { display: flex; align-items: center; gap: 12px; }
+  .topbar-left { display: flex; align-items: center; gap: 14px; }
+  .logo-sub { font-size: 11px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; }
+  .topbar-right { display: flex; align-items: center; gap: 10px; }
   .fecha-hoy { font-size: 13px; color: var(--muted); }
 
-  /* MAIN LAYOUT */
-  .main { padding: 28px 32px; }
+  /* MAIN */
+  .main { padding: 24px 28px; }
 
-  /* KPI CARDS */
-  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
-  .kpi {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 12px; padding: 18px 20px;
-  }
-  .kpi-label { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
-  .kpi-value { font-family: 'Barlow Condensed', sans-serif; font-size: 36px; font-weight: 900; line-height: 1; }
-  .kpi-value.red { color: var(--accent); }
-  .kpi-value.yellow { color: var(--yellow); }
-  .kpi-value.green { color: var(--green); }
-  .kpi-value.orange { color: var(--accent2); }
+  /* KPIs */
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+  .kpi { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px; }
+  .kpi-label { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+  .kpi-value { font-family: 'Barlow Condensed', sans-serif; font-size: 38px; font-weight: 900; line-height: 1; }
+  .kpi-value.red    { color: var(--accent); }
+  .kpi-value.yellow { color: #f59e0b; }
+  .kpi-value.green  { color: var(--green); }
+  .kpi-value.orange { color: #f97316; }
 
   /* CONTROLES */
-  .controls {
-    display: flex; align-items: center; gap: 12px; margin-bottom: 20px;
-    flex-wrap: wrap;
-  }
-  .filter-group { display: flex; align-items: center; gap: 8px; }
-  .filter-group label { font-size: 12px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+  .controls { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+  .filter-group { display: flex; align-items: center; gap: 6px; }
+  .filter-group label { font-size: 11px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
   select, input[type="date"] {
-    background: var(--card); border: 1px solid var(--border);
+    background: white; border: 1px solid var(--border);
     color: var(--text); font-family: 'Barlow', sans-serif; font-size: 14px;
     padding: 8px 12px; border-radius: 8px; outline: none; cursor: pointer;
   }
   select:focus, input:focus { border-color: var(--accent); }
 
   .btn {
-    padding: 9px 18px; border-radius: 8px; border: none; cursor: pointer;
-    font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 700;
-    letter-spacing: 1px; text-transform: uppercase; transition: opacity 0.2s;
+    padding: 9px 16px; border-radius: 8px; border: none; cursor: pointer;
+    font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700;
+    letter-spacing: 1px; text-transform: uppercase; transition: opacity 0.15s;
   }
-  .btn:hover { opacity: 0.85; }
-  .btn-primary { background: var(--accent); color: white; }
-  .btn-excel { background: #166534; color: white; }
+  .btn:hover { opacity: 0.82; }
+  .btn-excel   { background: #166534; color: white; }
   .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--muted); }
-  .btn-refresh { background: var(--card); border: 1px solid var(--border); color: var(--text); }
-
+  .btn-refresh { background: white; border: 1px solid var(--border); color: var(--text); }
+  .btn-danger  { background: #fef2f2; border: 1px solid #fca5a5; color: var(--red); }
+  .btn-danger-solid { background: var(--red); color: white; }
   .ml-auto { margin-left: auto; }
 
-  /* TABLA */
-  .table-wrap {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 12px; overflow: hidden;
-  }
-  table { width: 100%; border-collapse: collapse; }
-  thead { background: #1e1e1e; }
-  thead th {
-    font-family: 'Barlow Condensed', sans-serif; font-size: 11px;
-    letter-spacing: 2px; text-transform: uppercase; color: var(--muted);
-    padding: 14px 16px; text-align: left; border-bottom: 1px solid var(--border);
-    cursor: pointer; user-select: none;
-  }
-  thead th:hover { color: var(--text); }
-  tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
-  tbody tr:last-child { border-bottom: none; }
-  tbody tr:hover { background: rgba(255,255,255,0.03); }
-  tbody td { padding: 12px 16px; font-size: 14px; }
+  /* TARJETAS DE RUTA */
+  .rutas-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 16px; }
 
-  .ruta-cell { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 800; color: var(--text); }
-  .sku-cell { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; color: var(--muted); }
-  .prod-cell { font-size: 13px; }
-  .qty-cell { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 700; text-align: center; }
-  .qty-cell.red { color: var(--accent); }
-  .hora-cell { font-size: 12px; color: var(--muted); }
+  .ruta-card {
+    background: white; border: 1.5px solid var(--border);
+    border-radius: 14px; overflow: hidden;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    transition: box-shadow 0.2s;
+  }
+  .ruta-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.10); }
+  .ruta-card.estado-pendiente  { border-top: 4px solid #f59e0b; }
+  .ruta-card.estado-verificado { border-top: 4px solid var(--green); }
+
+  .ruta-card-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 16px 10px;
+  }
+  .ruta-nombre { font-family: 'Barlow Condensed', sans-serif; font-size: 28px; font-weight: 900; color: var(--text); }
+  .ruta-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  .ruta-header-right { display: flex; align-items: center; gap: 8px; }
 
   .status-chip {
-    display: inline-block; font-family: 'Barlow Condensed', sans-serif;
-    font-size: 11px; font-weight: 700; letter-spacing: 1px;
-    padding: 3px 10px; border-radius: 20px;
+    font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700;
+    letter-spacing: 1px; padding: 3px 10px; border-radius: 20px;
   }
-  .chip-pendiente { background: rgba(245,158,11,0.15); color: var(--yellow); border: 1px solid rgba(245,158,11,0.3); }
-  .chip-verificado { background: rgba(34,197,94,0.15); color: var(--green); border: 1px solid rgba(34,197,94,0.3); }
+  .chip-pendiente  { background: rgba(245,158,11,0.12); color: #b45309; border: 1px solid rgba(245,158,11,0.3); }
+  .chip-verificado { background: rgba(22,163,74,0.10);  color: var(--green); border: 1px solid rgba(22,163,74,0.3); }
 
-  /* AGRUPADO POR RUTA */
-  .group-header {
-    background: #1a1a1a; cursor: pointer;
-    border-bottom: 2px solid var(--border);
+  /* TABLA INTERNA */
+  .ruta-table { width: 100%; border-collapse: collapse; }
+  .ruta-table thead th {
+    font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted);
+    padding: 6px 16px; text-align: left; background: #fafafa;
+    border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
   }
-  .group-header td {
-    padding: 12px 16px;
-    font-family: 'Barlow Condensed', sans-serif;
+  .ruta-table thead th:last-child { text-align: center; }
+  .ruta-table tbody tr { border-bottom: 1px solid #f0f0f0; transition: background 0.1s; }
+  .ruta-table tbody tr:last-child { border-bottom: none; }
+  .ruta-table tbody tr:hover { background: #fafafa; }
+  .ruta-table tbody td { padding: 8px 16px; font-size: 13px; color: var(--text); }
+  .ruta-table .td-sku   { font-size: 11px; color: var(--muted); white-space: nowrap; }
+  .ruta-table .td-prod  { font-weight: 600; }
+  .ruta-table .td-qty   { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700; text-align: center; color: var(--accent); }
+  .ruta-table .td-carg  { font-size: 11px; color: var(--green); text-align: center; }
+  .ruta-table .td-del   { text-align: center; }
+  .btn-del-row {
+    background: none; border: none; cursor: pointer; color: #ccc;
+    font-size: 16px; padding: 2px 6px; border-radius: 4px; transition: color 0.15s;
   }
-  .group-header:hover { background: #222; }
-  .group-chevron { color: var(--muted); transition: transform 0.2s; margin-right: 8px; }
-  .group-chevron.open { transform: rotate(90deg); }
+  .btn-del-row:hover { color: var(--red); }
 
+  /* FOOTER TARJETA */
+  .ruta-card-footer {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 16px; background: #fafafa; border-top: 1px solid var(--border);
+    gap: 8px;
+  }
+  .footer-left { display: flex; gap: 8px; }
+
+  /* EMPTY / LOADING */
+  .empty   { text-align: center; padding: 60px; color: var(--muted); font-size: 14px; }
   .loading { text-align: center; padding: 60px; color: var(--muted); }
   .spinner { display: inline-block; width: 20px; height: 20px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.6s linear infinite; margin-right: 8px; vertical-align: middle; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  .empty { text-align: center; padding: 60px; color: var(--muted); font-size: 14px; }
-
-  /* MODAL DETALLE */
-  .modal-overlay {
-    display: none; position: fixed; inset: 0;
-    background: rgba(0,0,0,0.75); z-index: 200;
-    align-items: center; justify-content: center;
-  }
+  /* MODAL CONFIRMACION */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 300; align-items: center; justify-content: center; }
   .modal-overlay.visible { display: flex; }
-  .modal {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 16px; width: 600px; max-width: 95vw;
-    max-height: 85vh; overflow-y: auto;
-    padding: 28px;
-  }
-  .modal-title { font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 900; margin-bottom: 4px; }
-  .modal-meta { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
-  .modal-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-  .modal-table th { font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); padding: 8px 0; border-bottom: 1px solid var(--border); text-align: left; }
-  .modal-table td { padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
-  .modal-table tr:last-child td { border-bottom: none; }
-  .modal-close { background: var(--surface); border: 1px solid var(--border); color: var(--muted); padding: 8px 20px; border-radius: 8px; cursor: pointer; font-family: 'Barlow Condensed', sans-serif; font-size: 14px; letter-spacing: 1px; text-transform: uppercase; }
+  .modal { background: white; border-radius: 14px; padding: 28px; width: 380px; max-width: 95vw; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+  .modal-title { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+  .modal-body  { font-size: 14px; color: var(--muted); margin-bottom: 20px; line-height: 1.5; }
   .modal-footer { display: flex; gap: 10px; justify-content: flex-end; }
-
-  .tag-excel { font-size: 11px; color: #166534; background: rgba(34,197,94,0.1); padding: 2px 8px; border-radius: 6px; margin-left: 8px; }
+  .modal-cancel { background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 9px 18px; border-radius: 8px; cursor: pointer; font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+  .modal-confirm { background: var(--red); color: white; border: none; padding: 9px 18px; border-radius: 8px; cursor: pointer; font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
 
   @media (max-width: 900px) {
-    .kpis { grid-template-columns: repeat(2, 1fr); }
+    .kpis { grid-template-columns: repeat(2,1fr); }
     .main { padding: 16px; }
     .topbar { padding: 0 16px; }
+    .rutas-grid { grid-template-columns: 1fr; }
   }
 </style>
 </head>
 <body>
 
 <div class="topbar">
-  <div style="display:flex;align-items:center">
+  <div class="topbar-left">
     <img src="https://cedisangil.github.io/pedidos-app/nuevo-logo.png" alt="CEDI San Gil" style="height:42px;object-fit:contain;">
     <div class="logo-sub">Panel Admin · Devoluciones</div>
   </div>
@@ -180,22 +169,10 @@
 
   <!-- KPIs -->
   <div class="kpis">
-    <div class="kpi">
-      <div class="kpi-label">Total Devoluciones Hoy</div>
-      <div class="kpi-value red" id="kpiTotal">—</div>
-    </div>
-    <div class="kpi">
-      <div class="kpi-label">Rutas Con Devolución</div>
-      <div class="kpi-value orange" id="kpiRutas">—</div>
-    </div>
-    <div class="kpi">
-      <div class="kpi-label">Pendientes</div>
-      <div class="kpi-value yellow" id="kpiPendiente">—</div>
-    </div>
-    <div class="kpi">
-      <div class="kpi-label">Verificadas</div>
-      <div class="kpi-value green" id="kpiVerificado">—</div>
-    </div>
+    <div class="kpi"><div class="kpi-label">Registros Hoy</div><div class="kpi-value red" id="kpiTotal">—</div></div>
+    <div class="kpi"><div class="kpi-label">Rutas con Devolución</div><div class="kpi-value orange" id="kpiRutas">—</div></div>
+    <div class="kpi"><div class="kpi-label">Pendientes</div><div class="kpi-value yellow" id="kpiPendiente">—</div></div>
+    <div class="kpi"><div class="kpi-label">Verificadas</div><div class="kpi-value green" id="kpiVerificado">—</div></div>
   </div>
 
   <!-- CONTROLES -->
@@ -203,12 +180,6 @@
     <div class="filter-group">
       <label>Fecha</label>
       <input type="date" id="filtroFecha" onchange="aplicarFiltros()">
-    </div>
-    <div class="filter-group">
-      <label>Ruta</label>
-      <select id="filtroRuta" onchange="aplicarFiltros()">
-        <option value="">Todas</option>
-      </select>
     </div>
     <div class="filter-group">
       <label>Estado</label>
@@ -219,53 +190,28 @@
       </select>
     </div>
     <button class="btn btn-outline" onclick="limpiarFiltros()">Limpiar</button>
-    <div class="ml-auto" style="display:flex;gap:10px">
-      <button class="btn btn-excel" onclick="descargarExcel('filtrado')">
-        ↓ Excel Filtrado
-      </button>
-      <button class="btn btn-excel" style="background:#14532d" onclick="descargarExcel('verificado')">
-        ↓ Excel Verificados
-      </button>
+    <div class="ml-auto" style="display:flex;gap:8px;">
+      <button class="btn btn-danger" onclick="confirmarEliminarTodos()">🗑 Eliminar Todo</button>
+      <button class="btn btn-excel" onclick="descargarExcel('filtrado')">↓ Excel</button>
+      <button class="btn btn-excel" style="background:#14532d" onclick="descargarExcel('verificado')">↓ Solo Verificados</button>
     </div>
   </div>
 
-  <!-- TABLA -->
-  <div class="table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th>Ruta</th>
-          <th>Fecha</th>
-          <th>Hora</th>
-          <th>SKU</th>
-          <th>Producto</th>
-          <th style="text-align:center">Cjx Carg.</th>
-          <th style="text-align:center">Bt Carg.</th>
-          <th style="text-align:center">Cjx Dev.</th>
-          <th style="text-align:center">Bt Dev.</th>
-          <th>Estado</th>
-        </tr>
-      </thead>
-      <tbody id="tablaBody">
-        <tr><td colspan="10" class="loading"><span class="spinner"></span>Cargando datos...</td></tr>
-      </tbody>
-    </table>
+  <!-- TARJETAS -->
+  <div class="rutas-grid" id="rutasGrid">
+    <div class="loading"><span class="spinner"></span>Cargando...</div>
   </div>
 
 </div>
 
-<!-- MODAL -->
-<div class="modal-overlay" id="modalOverlay" onclick="cerrarModal(event)">
-  <div class="modal" id="modalContent">
-    <div class="modal-title" id="modalTitle"></div>
-    <div class="modal-meta" id="modalMeta"></div>
-    <table class="modal-table">
-      <thead><tr><th>SKU</th><th>Producto</th><th>Cjx Carg.</th><th>Bt Carg.</th><th>Cjx Dev.</th><th>Bt Dev.</th></tr></thead>
-      <tbody id="modalBody"></tbody>
-    </table>
+<!-- MODAL CONFIRMACION -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-title" id="modalTitle">¿Confirmar eliminación?</div>
+    <div class="modal-body"  id="modalBody"></div>
     <div class="modal-footer">
-      <button class="modal-close" onclick="document.getElementById('modalOverlay').classList.remove('visible')">Cerrar</button>
-      <button class="btn btn-excel" onclick="descargarExcelGrupo()">↓ Excel esta devolución</button>
+      <button class="modal-cancel" onclick="cerrarModal()">Cancelar</button>
+      <button class="modal-confirm" id="modalConfirmBtn">Eliminar</button>
     </div>
   </div>
 </div>
@@ -276,164 +222,210 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
 let todosLosDatos = [];
 let datosFiltrados = [];
-let grupoModal = null;
 
-// Fecha de hoy
 const hoy = new Date();
-const hoyStr = hoy.toLocaleDateString('es-CO', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '/');
 const hoyISO = hoy.toISOString().split('T')[0];
+const hoyStr = `${String(hoy.getDate()).padStart(2,'0')}/${String(hoy.getMonth()+1).padStart(2,'0')}/${hoy.getFullYear()}`;
 
-document.getElementById('fechaHoy').textContent = hoy.toLocaleDateString('es-CO', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
+document.getElementById('fechaHoy').textContent = hoy.toLocaleDateString('es-CO', { weekday:'long', day:'2-digit', month:'long', year:'numeric' });
 document.getElementById('filtroFecha').value = hoyISO;
 
 async function cargarDatos() {
-  document.getElementById('tablaBody').innerHTML = '<tr><td colspan="10" class="loading"><span class="spinner"></span>Cargando...</td></tr>';
-
+  document.getElementById('rutasGrid').innerHTML = '<div class="loading"><span class="spinner"></span>Cargando...</div>';
   try {
-    const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/devoluciones?order=fecha.desc,hora.desc&limit=1000`,
-      { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }
-    );
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/devoluciones?order=fecha.desc,hora.desc&limit=2000`,
+      { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
     todosLosDatos = await res.json();
-
-    // Llenar rutas en filtro
-    const rutas = [...new Set(todosLosDatos.map(d => d.ruta))].sort();
-    const sel = document.getElementById('filtroRuta');
-    sel.innerHTML = '<option value="">Todas</option>' + rutas.map(r => `<option>${r}</option>`).join('');
-
     aplicarFiltros();
   } catch(e) {
-    document.getElementById('tablaBody').innerHTML = '<tr><td colspan="10" class="empty">Error al cargar datos.</td></tr>';
+    document.getElementById('rutasGrid').innerHTML = '<div class="empty">Error al cargar datos.</div>';
   }
 }
 
 function parseFecha(iso) {
-  // filtroFecha es YYYY-MM-DD, datos tienen DD/MM/YYYY
   if (!iso) return '';
-  const [y, m, d] = iso.split('-');
+  const [y,m,d] = iso.split('-');
   return `${d}/${m}/${y}`;
 }
 
 function aplicarFiltros() {
-  const fechaFiltro = parseFecha(document.getElementById('filtroFecha').value);
-  const rutaFiltro = document.getElementById('filtroRuta').value;
-  const estadoFiltro = document.getElementById('filtroEstado').value;
+  const fechaF  = parseFecha(document.getElementById('filtroFecha').value);
+  const estadoF = document.getElementById('filtroEstado').value;
 
   datosFiltrados = todosLosDatos.filter(d => {
-    if (fechaFiltro && d.fecha !== fechaFiltro) return false;
-    if (rutaFiltro && d.ruta !== rutaFiltro) return false;
-    if (estadoFiltro && d.estado !== estadoFiltro) return false;
+    if (fechaF  && d.fecha  !== fechaF)  return false;
+    if (estadoF && d.estado !== estadoF) return false;
     return true;
   });
 
   actualizarKPIs();
-  renderTabla();
+  renderTarjetas();
 }
 
 function limpiarFiltros() {
   document.getElementById('filtroFecha').value = hoyISO;
-  document.getElementById('filtroRuta').value = '';
   document.getElementById('filtroEstado').value = '';
   aplicarFiltros();
 }
 
 function actualizarKPIs() {
-  const hoySel = parseFecha(document.getElementById('filtroFecha').value) || hoyStr;
-  const deHoy = todosLosDatos.filter(d => d.fecha === hoySel);
-  const rutasHoy = new Set(deHoy.map(d => d.ruta)).size;
-  const pendientes = new Set(deHoy.filter(d => d.estado === 'pendiente').map(d => `${d.ruta}|${d.fecha}|${d.hora}`)).size;
-  const verificados = new Set(deHoy.filter(d => d.estado === 'verificado').map(d => `${d.ruta}|${d.fecha}|${d.hora}`)).size;
-
-  document.getElementById('kpiTotal').textContent = deHoy.length;
-  document.getElementById('kpiRutas').textContent = rutasHoy;
-  document.getElementById('kpiPendiente').textContent = pendientes;
+  const deHoy = todosLosDatos.filter(d => d.fecha === hoyStr);
+  const grupos = agrupar(deHoy);
+  const pendientes  = Object.values(grupos).filter(g => g.estado === 'pendiente').length;
+  const verificados = Object.values(grupos).filter(g => g.estado === 'verificado').length;
+  document.getElementById('kpiTotal').textContent    = deHoy.length;
+  document.getElementById('kpiRutas').textContent    = Object.keys(grupos).length;
+  document.getElementById('kpiPendiente').textContent  = pendientes;
   document.getElementById('kpiVerificado').textContent = verificados;
 }
 
-function renderTabla() {
-  const tbody = document.getElementById('tablaBody');
-  if (datosFiltrados.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="10" class="empty">No se encontraron registros.</td></tr>';
+function agrupar(datos) {
+  const g = {};
+  datos.forEach(d => {
+    const key = `${d.ruta}|${d.fecha}|${d.hora}`;
+    if (!g[key]) g[key] = { ruta: d.ruta, fecha: d.fecha, hora: d.hora, estado: d.estado, items: [] };
+    if (d.estado === 'pendiente') g[key].estado = 'pendiente';
+    g[key].items.push(d);
+  });
+  return g;
+}
+
+function renderTarjetas() {
+  const grid = document.getElementById('rutasGrid');
+  if (!datosFiltrados.length) {
+    grid.innerHTML = '<div class="empty">No se encontraron devoluciones.</div>';
     return;
   }
 
-  tbody.innerHTML = datosFiltrados.map(d => `
-    <tr>
-      <td class="ruta-cell">${d.ruta}</td>
-      <td class="hora-cell">${d.fecha}</td>
-      <td class="hora-cell">${d.hora}</td>
-      <td class="sku-cell">${d.sku}</td>
-      <td class="prod-cell">${d.producto}</td>
-      <td class="qty-cell">${d.cajas_cargadas ?? '—'}</td>
-      <td class="qty-cell">${d.botellas_cargadas ?? '—'}</td>
-      <td class="qty-cell red">${d.cajas_devueltas ?? 0}</td>
-      <td class="qty-cell red">${d.botellas_devueltas ?? 0}</td>
-      <td><span class="status-chip chip-${d.estado}">${d.estado.toUpperCase()}</span></td>
-    </tr>
-  `).join('');
+  const grupos = agrupar(datosFiltrados);
+  grid.innerHTML = Object.values(grupos).map(g => {
+    const chip = `<span class="status-chip chip-${g.estado}">${g.estado.toUpperCase()}</span>`;
+    const filas = g.items.map(item => {
+      const cargado = (item.cajas_cargadas || item.botellas_cargadas)
+        ? `${item.cajas_cargadas ?? 0}Cj / ${item.botellas_cargadas ?? 0}Bt`
+        : '—';
+      const devuelto = `${item.cajas_devueltas ?? 0} Cj / ${item.botellas_devueltas ?? 0} Bt`;
+      return `<tr>
+        <td class="td-sku">${item.sku}</td>
+        <td class="td-prod">${item.producto}</td>
+        <td class="td-carg">${cargado}</td>
+        <td class="td-qty">${devuelto}</td>
+        <td class="td-del"><button class="btn-del-row" onclick="confirmarEliminarItem(${item.id}, '${item.producto}')" title="Eliminar">🗑</button></td>
+      </tr>`;
+    }).join('');
+
+    return `<div class="ruta-card estado-${g.estado}">
+      <div class="ruta-card-header">
+        <div>
+          <div class="ruta-nombre">${g.ruta}</div>
+          <div class="ruta-meta">${g.fecha} · ${g.hora} · ${g.items.length} productos</div>
+        </div>
+        <div class="ruta-header-right">${chip}</div>
+      </div>
+      <table class="ruta-table">
+        <thead><tr>
+          <th>SKU</th><th>Producto</th><th>Cargado</th><th>Devuelto</th><th>Del</th>
+        </tr></thead>
+        <tbody>${filas}</tbody>
+      </table>
+      <div class="ruta-card-footer">
+        <div class="footer-left">
+          <button class="btn btn-danger" onclick="confirmarEliminarGrupo('${g.ruta}', '${g.fecha}', '${g.hora}')">🗑 Eliminar devolución</button>
+          <button class="btn btn-excel" onclick="descargarExcelGrupo('${g.ruta}', '${g.fecha}', '${g.hora}')">↓ Excel</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
 }
 
+// ─── ELIMINAR ────────────────────────────────────────────────
+let accionPendiente = null;
+
+function confirmarEliminarItem(id, nombre) {
+  document.getElementById('modalTitle').textContent = 'Eliminar registro';
+  document.getElementById('modalBody').textContent  = `¿Eliminar "${nombre}" de la devolución? Esta acción no se puede deshacer.`;
+  document.getElementById('modalConfirmBtn').onclick = () => eliminarItem(id);
+  document.getElementById('modalOverlay').classList.add('visible');
+}
+
+function confirmarEliminarGrupo(ruta, fecha, hora) {
+  document.getElementById('modalTitle').textContent = `Eliminar devolución ${ruta}`;
+  document.getElementById('modalBody').textContent  = `¿Eliminar TODA la devolución de la ruta ${ruta} del ${fecha}? Esta acción no se puede deshacer.`;
+  document.getElementById('modalConfirmBtn').onclick = () => eliminarGrupo(ruta, fecha, hora);
+  document.getElementById('modalOverlay').classList.add('visible');
+}
+
+function confirmarEliminarTodos() {
+  const fechaF = parseFecha(document.getElementById('filtroFecha').value) || hoyStr;
+  document.getElementById('modalTitle').textContent = 'Eliminar todas las devoluciones';
+  document.getElementById('modalBody').textContent  = `¿Eliminar TODAS las devoluciones del ${fechaF}? Esta acción no se puede deshacer.`;
+  document.getElementById('modalConfirmBtn').onclick = () => eliminarTodos(fechaF);
+  document.getElementById('modalOverlay').classList.add('visible');
+}
+
+function cerrarModal() {
+  document.getElementById('modalOverlay').classList.remove('visible');
+}
+
+async function eliminarItem(id) {
+  cerrarModal();
+  await fetch(`${SUPABASE_URL}/rest/v1/devoluciones?id=eq.${id}`, {
+    method: 'DELETE',
+    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+  });
+  todosLosDatos = todosLosDatos.filter(d => d.id !== id);
+  aplicarFiltros();
+}
+
+async function eliminarGrupo(ruta, fecha, hora) {
+  cerrarModal();
+  await fetch(`${SUPABASE_URL}/rest/v1/devoluciones?ruta=eq.${ruta}&fecha=eq.${encodeURIComponent(fecha)}&hora=eq.${encodeURIComponent(hora)}`, {
+    method: 'DELETE',
+    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+  });
+  todosLosDatos = todosLosDatos.filter(d => !(d.ruta === ruta && d.fecha === fecha && d.hora === hora));
+  aplicarFiltros();
+}
+
+async function eliminarTodos(fecha) {
+  cerrarModal();
+  await fetch(`${SUPABASE_URL}/rest/v1/devoluciones?fecha=eq.${encodeURIComponent(fecha)}`, {
+    method: 'DELETE',
+    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+  });
+  todosLosDatos = todosLosDatos.filter(d => d.fecha !== fecha);
+  aplicarFiltros();
+}
+
+// ─── EXCEL ───────────────────────────────────────────────────
 function descargarExcel(tipo) {
-  let datos = tipo === 'verificado'
-    ? todosLosDatos.filter(d => d.estado === 'verificado')
-    : datosFiltrados;
+  const datos = tipo === 'verificado' ? todosLosDatos.filter(d => d.estado === 'verificado') : datosFiltrados;
+  if (!datos.length) { alert('No hay datos para exportar.'); return; }
+  exportarExcel(datos, `Devoluciones_${tipo}_${hoyISO}`);
+}
 
-  if (datos.length === 0) {
-    alert('No hay datos para exportar.');
-    return;
-  }
+function descargarExcelGrupo(ruta, fecha, hora) {
+  const datos = todosLosDatos.filter(d => d.ruta === ruta && d.fecha === fecha && d.hora === hora);
+  exportarExcel(datos, `Devolucion_${ruta}_${fecha.replace(/\//g,'-')}`);
+}
 
+function exportarExcel(datos, nombre) {
   const ws_data = [
-    ['Fecha', 'Hora', 'Ruta', 'SKU', 'Producto', 'Cajas Cargadas', 'Botellas Cargadas', 'Cajas Devueltas', 'Botellas Devueltas', 'Estado'],
-    ...datos.map(d => [
-      d.fecha, d.hora, d.ruta, d.sku, d.producto,
+    ['Fecha','Hora','Ruta','SKU','Producto','Cajas Cargadas','Botellas Cargadas','Cajas Devueltas','Botellas Devueltas','Estado'],
+    ...datos.map(d => [d.fecha, d.hora, d.ruta, d.sku, d.producto,
       d.cajas_cargadas ?? '', d.botellas_cargadas ?? '',
       d.cajas_devueltas ?? 0, d.botellas_devueltas ?? 0,
-      d.estado.toUpperCase()
-    ])
+      d.estado.toUpperCase()])
   ];
-
   const wb = XLSX.utils.book_new();
   const ws = XLSX.utils.aoa_to_sheet(ws_data);
-
-  // Anchos de columnas
-  ws['!cols'] = [{ wch: 12 }, { wch: 12 }, { wch: 10 }, { wch: 10 }, { wch: 30 }, { wch: 15 }, { wch: 16 }, { wch: 15 }, { wch: 16 }, { wch: 12 }];
-
+  ws['!cols'] = [{wch:12},{wch:10},{wch:10},{wch:10},{wch:30},{wch:14},{wch:16},{wch:14},{wch:16},{wch:12}];
   XLSX.utils.book_append_sheet(wb, ws, 'Devoluciones');
-
-  const fecha = new Date().toLocaleDateString('es-CO').replace(/\//g, '-');
-  XLSX.writeFile(wb, `Devoluciones_${tipo}_${fecha}.xlsx`);
-}
-
-function descargarExcelGrupo() {
-  if (!grupoModal) return;
-  const { ruta, fecha, hora, items } = grupoModal;
-
-  const ws_data = [
-    ['Fecha', 'Hora', 'Ruta', 'SKU', 'Producto', 'Cajas Cargadas', 'Botellas Cargadas', 'Cajas Devueltas', 'Botellas Devueltas', 'Estado'],
-    ...items.map(d => [
-      d.fecha, d.hora, d.ruta, d.sku, d.producto,
-      d.cajas_cargadas ?? '', d.botellas_cargadas ?? '',
-      d.cajas_devueltas ?? 0, d.botellas_devueltas ?? 0,
-      d.estado.toUpperCase()
-    ])
-  ];
-
-  const wb = XLSX.utils.book_new();
-  const ws = XLSX.utils.aoa_to_sheet(ws_data);
-  ws['!cols'] = [{ wch: 12 }, { wch: 12 }, { wch: 10 }, { wch: 10 }, { wch: 30 }, { wch: 15 }, { wch: 16 }, { wch: 15 }, { wch: 16 }, { wch: 12 }];
-  XLSX.utils.book_append_sheet(wb, ws, 'Devolucion');
-  XLSX.writeFile(wb, `Devolucion_${ruta}_${fecha.replace(/\//g, '-')}.xlsx`);
-}
-
-function cerrarModal(e) {
-  if (e.target === document.getElementById('modalOverlay')) {
-    document.getElementById('modalOverlay').classList.remove('visible');
-  }
+  XLSX.writeFile(wb, nombre + '.xlsx');
 }
 
 cargarDatos();
-setInterval(cargarDatos, 60000); // Auto-refresh cada minuto
+setInterval(cargarDatos, 60000);
 </script>
 </body>
 </html>

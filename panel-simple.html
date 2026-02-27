@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Admin Simple</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { background: #1a1a1a; color: white; padding: 50px; font-family: Arial; }
+        .upload { background: #2a2a2a; padding: 40px; border: 3px solid red; border-radius: 10px; cursor: pointer; text-align: center; }
+        .preview { margin-top: 30px; background: #333; padding: 20px; border-radius: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 10px; border: 1px solid #555; text-align: left; }
+        th { background: red; }
+        button { background: green; color: white; padding: 15px 30px; font-size: 16px; border: none; border-radius: 5px; cursor: pointer; margin: 10px; }
+    </style>
+</head>
+<body>
+    <h1>📊 Panel Administrador - Carga Inventario</h1>
+    
+    <div class="upload" onclick="document.getElementById('file').click()">
+        <h2>📁 CLICK PARA SELECCIONAR ARCHIVO</h2>
+        <p>Archivo Excel (.xls) de SAP</p>
+        <input type="file" id="file" style="display:none" accept=".xls,.xlsx,.txt,.csv" onchange="cargarArchivo(event)">
+    </div>
+    
+    <div id="mensaje" style="margin: 20px 0; padding: 15px; background: #444; border-radius: 5px;"></div>
+    
+    <div id="preview" class="preview" style="display:none;">
+        <h3>Vista Previa - <span id="totalProductos">0</span> productos</h3>
+        <table id="tabla">
+            <thead>
+                <tr>
+                    <th>SKU</th>
+                    <th>Producto</th>
+                    <th>Cajas</th>
+                    <th>Botellas</th>
+                </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+        </table>
+        <button onclick="confirmarCarga()">✅ CONFIRMAR Y CARGAR A BASE DE DATOS</button>
+        <button onclick="cancelar()">❌ CANCELAR</button>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://etxtmdljkxdaonyldcmn.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV0eHRtZGxqa3hkYW9ueWxkY21uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0NDE1OTAsImV4cCI6MjA3OTAxNzU5MH0.SII1FIsgyuSv1oI1_xJs_MOUvYxNTnJsBEXigbZsosk';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        let productosTemp = [];
+        
+        function cargarArchivo(event) {
+            const file = event.target.files[0];
+            if (!file) {
+                alert('No se seleccionó archivo');
+                return;
+            }
+            
+            document.getElementById('mensaje').innerHTML = '⏳ Procesando ' + file.name + '...';
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const contenido = e.target.result;
+                    const lineas = contenido.split(/\r?\n/);
+                    const productos = [];
+                    
+                    console.log('Total líneas:', lineas.length);
+                    
+                    for (let i = 0; i < lineas.length; i++) {
+                        const linea = lineas[i].trim();
+                        if (!linea) continue;
+                        
+                        const cols = linea.split('\t');
+                        if (cols.length < 9) continue;
+                        
+                        const sku = cols[2] ? cols[2].trim() : '';
+                        const nombre = cols[5] ? cols[5].trim() : '';
+                        const cajas = parseInt((cols[7] || '0').replace(/\s+/g, '')) || 0;
+                        const botellas = parseInt((cols[8] || '0').replace(/\s+/g, '')) || 0;
+                        
+                        if (!/^\d+$/.test(sku)) continue;
+                        if (nombre === 'Texto breve de material' || nombre === 'Materia') continue;
+                        
+                        productos.push({ sku, nombre, cajas, botellas });
+                    }
+                    
+                    console.log('Productos extraídos:', productos.length);
+                    
+                    if (productos.length === 0) {
+                        document.getElementById('mensaje').innerHTML = '❌ No se encontraron productos';
+                        return;
+                    }
+                    
+                    productosTemp = productos;
+                    mostrarPreview(productos);
+                    
+                } catch (error) {
+                    console.error('Error:', error);
+                    document.getElementById('mensaje').innerHTML = '❌ Error: ' + error.message;
+                }
+            };
+            reader.readAsText(file);
+        }
+        
+        function mostrarPreview(productos) {
+            document.getElementById('totalProductos').textContent = productos.length;
+            document.getElementById('mensaje').innerHTML = '✅ ' + productos.length + ' productos cargados';
+            
+            const tbody = document.getElementById('tbody');
+            tbody.innerHTML = '';
+            
+            productos.slice(0, 50).forEach(p => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td>${p.sku}</td><td>${p.nombre}</td><td>${p.cajas}</td><td>${p.botellas}</td>`;
+                tbody.appendChild(tr);
+            });
+            
+            if (productos.length > 50) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td colspan="4" style="text-align:center; color: yellow;">... y ${productos.length - 50} productos más</td>`;
+                tbody.appendChild(tr);
+            }
+            
+            document.getElementById('preview').style.display = 'block';
+        }
+        
+        async function confirmarCarga() {
+            if (!confirm('¿Cargar ' + productosTemp.length + ' productos a la base de datos?')) return;
+            
+            document.getElementById('mensaje').innerHTML = '⏳ Cargando a Supabase...';
+            
+            try {
+                // Marcar anteriores como inactivos
+                await supabase.from('inventario_teorico').update({ activo: false }).eq('activo', true);
+                
+                // Insertar nuevos
+                const registros = productosTemp.map(p => ({
+                    sku: p.sku,
+                    nombre_producto: p.nombre,
+                    cajas_teoricas: p.cajas,
+                    botellas_teoricas: p.botellas,
+                    activo: true
+                }));
+                
+                const { error } = await supabase.from('inventario_teorico').insert(registros);
+                
+                if (error) throw error;
+                
+                alert('✅ ' + productosTemp.length + ' productos cargados exitosamente!');
+                document.getElementById('mensaje').innerHTML = '✅ Carga completada';
+                cancelar();
+                
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Error al cargar: ' + error.message);
+            }
+        }
+        
+        function cancelar() {
+            document.getElementById('preview').style.display = 'none';
+            document.getElementById('file').value = '';
+            productosTemp = [];
+        }
+    </script>
+</body>
+</html>

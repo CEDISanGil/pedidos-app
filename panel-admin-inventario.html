@@ -361,40 +361,53 @@
             const file = event.target.files[0];
             if (!file) return;
 
-            mostrarAlerta('Procesando archivo...', 'warning');
+            console.log('Archivo seleccionado:', file.name, 'Tamaño:', file.size);
+            mostrarAlerta('⏳ Procesando archivo...', 'warning');
 
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
-                    const contenido = e.target.result;
+                    console.log('Archivo leído, procesando...');
+                    let contenido = e.target.result;
                     const fileName = file.name.toLowerCase();
                     
                     let productos = [];
                     
                     // Detectar tipo de archivo
                     if (fileName.endsWith('.xls') || fileName.endsWith('.xlsx') || fileName.endsWith('.txt') || fileName.endsWith('.csv')) {
+                        console.log('Detectado como archivo Excel/TSV');
                         // Parsear archivo Excel/TSV
                         productos = parsearExcel(contenido);
                     } else {
+                        console.log('Detectado como archivo MHTML');
                         // Parsear archivo MHTML
                         productos = parsearMHTML(contenido);
                     }
                     
+                    console.log('Productos procesados:', productos.length);
+                    
                     inventarioTemporal = productos;
                     
                     if (inventarioTemporal.length === 0) {
-                        mostrarAlerta('❌ No se encontraron productos en el archivo', 'error');
+                        mostrarAlerta('❌ No se encontraron productos en el archivo. Verifica la consola (F12) para más detalles.', 'error');
                         return;
                     }
 
                     mostrarVistaPrevia(inventarioTemporal);
                     mostrarAlerta(`✅ Archivo procesado: ${inventarioTemporal.length} productos encontrados`, 'success');
                 } catch (error) {
-                    console.error('Error:', error);
+                    console.error('Error procesando archivo:', error);
                     mostrarAlerta('❌ Error al procesar el archivo: ' + error.message, 'error');
                 }
             };
-            reader.readAsText(file);
+            
+            reader.onerror = function(error) {
+                console.error('Error leyendo archivo:', error);
+                mostrarAlerta('❌ Error al leer el archivo', 'error');
+            };
+            
+            // Leer como texto con encoding UTF-8 por defecto
+            reader.readAsText(file, 'UTF-8');
         }
 
         // Parser de archivo Excel/TSV
@@ -402,30 +415,54 @@
             const productos = [];
             const lineas = contenido.split(/\r?\n/);
             
-            console.log(`Total líneas en archivo: ${lineas.length}`);
+            console.log(`📄 Total líneas en archivo: ${lineas.length}`);
+            console.log(`📄 Primera línea: ${lineas[0]}`);
+            console.log(`📄 Segunda línea: ${lineas[1]}`);
+            
+            let productosProcesados = 0;
+            let lineasSaltadas = 0;
             
             for (let i = 0; i < lineas.length; i++) {
                 const linea = lineas[i].trim();
-                if (!linea) continue;
+                if (!linea) {
+                    lineasSaltadas++;
+                    continue;
+                }
                 
                 // Dividir por tabuladores
                 const columnas = linea.split('\t');
                 
-                // Debe tener al menos 8 columnas
-                if (columnas.length < 8) continue;
+                // Debug: mostrar primera fila con datos
+                if (i === 2 && columnas.length > 0) {
+                    console.log(`📄 Ejemplo de fila ${i}:`, columnas);
+                    console.log(`   Columnas encontradas: ${columnas.length}`);
+                }
                 
-                // Extraer datos (índices pueden variar, ajustar según tu archivo)
-                // Estructura: [vacío, vacío, Material, Centro, Almacén, Nombre, UMB, LibrUtiliz, Residuo, ...]
+                // Debe tener al menos 8 columnas
+                if (columnas.length < 8) {
+                    lineasSaltadas++;
+                    continue;
+                }
+                
+                // Extraer datos
+                // Estructura observada: [vacío, vacío, Material(SKU), Centro, Almacén, Nombre, UMB, Cajas, Botellas, ...]
                 const sku = columnas[2] ? columnas[2].trim() : '';
                 const nombre = columnas[5] ? columnas[5].trim() : '';
                 const cajasStr = columnas[7] ? columnas[7].trim() : '0';
                 const botellasStr = columnas[8] ? columnas[8].trim() : '0';
                 
                 // Validar que el SKU sea numérico
-                if (!sku || !/^\d+$/.test(sku)) continue;
+                if (!sku || !/^\d+$/.test(sku)) {
+                    lineasSaltadas++;
+                    continue;
+                }
                 
                 // Validar que no sea encabezado
-                if (nombre === 'Texto breve de material' || nombre === 'Material') continue;
+                if (nombre === 'Texto breve de material' || nombre === 'Material' || nombre === 'Materia') {
+                    console.log(`📄 Saltando encabezado: ${nombre}`);
+                    lineasSaltadas++;
+                    continue;
+                }
                 
                 // Limpiar y convertir cantidades (pueden tener espacios)
                 const cajas = parseInt(cajasStr.replace(/\s+/g, '')) || 0;
@@ -437,9 +474,24 @@
                     cajas: cajas,
                     botellas: botellas
                 });
+                
+                productosProcesados++;
+                
+                // Mostrar primer producto como ejemplo
+                if (productosProcesados === 1) {
+                    console.log(`✅ Primer producto extraído:`, {
+                        sku: sku,
+                        nombre: nombre,
+                        cajas: cajas,
+                        botellas: botellas
+                    });
+                }
             }
             
-            console.log(`Productos extraídos: ${productos.length}`);
+            console.log(`📊 Resumen:`);
+            console.log(`   ✅ Productos extraídos: ${productos.length}`);
+            console.log(`   ⏭️  Líneas saltadas: ${lineasSaltadas}`);
+            
             return productos;
         }
 

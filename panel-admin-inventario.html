@@ -383,23 +383,50 @@
         // Parser de archivo MHTML
         function parsearMHTML(contenido) {
             const productos = [];
-            const regex = /<td[^>]*x:str="(\d+)"[^>]*>(\d+)<\/td>\s*<td[^>]*x:str="[^"]*"[^>]*>[^<]*<\/td>\s*<td[^>]*x:str="[^"]*"[^>]*>[^<]*<\/td>\s*<td[^>]*x:str="([^"]+)"[^>]*>([^<]+)<\/td>\s*<td[^>]*x:str="[^"]*"[^>]*>[^<]*<\/td>\s*<td[^>]*x:num="(\d+)"[^>]*>(\d+)<\/td>\s*<td[^>]*x:num="(\d+)"[^>]*>(\d+)<\/td>/g;
             
-            let match;
-            while ((match = regex.exec(contenido)) !== null) {
-                const sku = match[2];
-                const nombre = match[4].trim();
-                const cajas = parseInt(match[6]) || 0;
-                const botellas = parseInt(match[8]) || 0;
-                
-                productos.push({
-                    sku: sku,
-                    nombre: nombre,
-                    cajas: cajas,
-                    botellas: botellas
-                });
+            // Buscar todas las filas de la tabla
+            const filaRegex = /<tr[^>]*>(.*?)<\/tr>/gs;
+            const filas = contenido.match(filaRegex);
+            
+            if (!filas) {
+                console.log('No se encontraron filas en el archivo');
+                return productos;
             }
             
+            console.log(`Total filas encontradas: ${filas.length}`);
+            
+            for (const fila of filas) {
+                // Extraer todas las celdas de la fila
+                const celdas = [];
+                const celdaRegex = /<td[^>]*?(?:x:str="([^"]*)"|x:num="([^"]*)").*?>(.*?)<\/td>/g;
+                let match;
+                
+                while ((match = celdaRegex.exec(fila)) !== null) {
+                    const valor = match[1] || match[2] || match[3].replace(/<[^>]*>/g, '').trim();
+                    celdas.push(valor);
+                }
+                
+                // Si tiene al menos 7 celdas, es una fila de datos
+                // Estructura: [Material, Centro, Almacén, Nombre, UMB, LibreUtil, Residuo, ...]
+                if (celdas.length >= 7) {
+                    const sku = celdas[0];
+                    const nombre = celdas[3];
+                    const cajas = parseInt(celdas[5]) || 0;
+                    const botellas = parseInt(celdas[6]) || 0;
+                    
+                    // Validar que el SKU sea numérico y no sea encabezado
+                    if (sku && /^\d+$/.test(sku) && nombre && nombre !== 'Material') {
+                        productos.push({
+                            sku: sku,
+                            nombre: nombre,
+                            cajas: cajas,
+                            botellas: botellas
+                        });
+                    }
+                }
+            }
+            
+            console.log(`Productos extraídos: ${productos.length}`);
             return productos;
         }
 

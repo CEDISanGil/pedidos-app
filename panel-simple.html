@@ -44,24 +44,48 @@
     </div>
 
     <script>
-        const SUPABASE_URL = 'https://etxtmdljkxdaonyldcmn.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV0eHRtZGxqa3hkYW9ueWxkY21uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0NDE1OTAsImV4cCI6MjA3OTAxNzU5MH0.SII1FIsgyuSv1oI1_xJs_MOUvYxNTnJsBEXigbZsosk';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        
+        let supabase;
         let productosTemp = [];
         
+        // Esperar a que la página y Supabase carguen
+        window.onload = function() {
+            console.log('✅ Página cargada');
+            
+            if (typeof window.supabase === 'undefined') {
+                document.getElementById('mensaje').innerHTML = '❌ Error: No se pudo cargar Supabase. Recarga la página.';
+                console.error('Supabase no se cargó');
+                return;
+            }
+            
+            const SUPABASE_URL = 'https://etxtmdljkxdaonyldcmn.supabase.co';
+            const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV0eHRtZGxqa3hkYW9ueWxkY21uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0NDE1OTAsImV4cCI6MjA3OTAxNzU5MH0.SII1FIsgyuSv1oI1_xJs_MOUvYxNTnJsBEXigbZsosk';
+            
+            try {
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                console.log('✅ Supabase inicializado');
+                document.getElementById('mensaje').innerHTML = '✅ Sistema listo. Selecciona tu archivo Excel.';
+            } catch (error) {
+                console.error('Error inicializando Supabase:', error);
+                document.getElementById('mensaje').innerHTML = '❌ Error inicializando base de datos';
+            }
+        };
+        
         function cargarArchivo(event) {
+            console.log('✅ cargarArchivo ejecutado');
+            
             const file = event.target.files[0];
             if (!file) {
                 alert('No se seleccionó archivo');
                 return;
             }
             
+            console.log('✅ Archivo:', file.name, file.size);
             document.getElementById('mensaje').innerHTML = '⏳ Procesando ' + file.name + '...';
             
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
+                    console.log('✅ Archivo leído');
                     const contenido = e.target.result;
                     const lineas = contenido.split(/\r?\n/);
                     const productos = [];
@@ -86,7 +110,7 @@
                         productos.push({ sku, nombre, cajas, botellas });
                     }
                     
-                    console.log('Productos extraídos:', productos.length);
+                    console.log('✅ Productos extraídos:', productos.length);
                     
                     if (productos.length === 0) {
                         document.getElementById('mensaje').innerHTML = '❌ No se encontraron productos';
@@ -101,6 +125,12 @@
                     document.getElementById('mensaje').innerHTML = '❌ Error: ' + error.message;
                 }
             };
+            
+            reader.onerror = function(error) {
+                console.error('Error leyendo:', error);
+                document.getElementById('mensaje').innerHTML = '❌ Error leyendo archivo';
+            };
+            
             reader.readAsText(file);
         }
         

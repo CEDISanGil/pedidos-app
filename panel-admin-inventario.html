@@ -266,7 +266,7 @@
             <div id="alertContainer"></div>
 
             <div class="file-upload" id="fileUploadArea" onclick="document.getElementById('fileInput').click()" style="cursor: pointer;">
-                <input type="file" id="fileInput" accept=".xls,.xlsx,.mhtml,.mht,.html,.htm,.txt,.csv" style="display: none;">
+                <input type="file" id="fileInput" accept=".xls,.xlsx,.mhtml,.mht,.html,.htm,.txt,.csv" style="display: none;" onchange="procesarArchivoSAP(event)">
                 <p style="font-size: 3em; margin-bottom: 10px;">📁</p>
                 <p style="font-size: 1.2em; color: #fbbc04;">Click para seleccionar archivo de SAP</p>
                 <p style="color: #999; margin-top: 10px;">Formatos: Excel (.xls, .xlsx) o MHTML</p>
@@ -343,9 +343,6 @@
 
         // Inicializar
         document.addEventListener('DOMContentLoaded', function() {
-            // Cambio en el input procesa el archivo
-            document.getElementById('fileInput').addEventListener('change', procesarArchivoSAP);
-            
             cargarEstadisticas();
             cargarConteos();
             
@@ -356,58 +353,68 @@
             }, 30000);
         });
 
-        // Procesar archivo MHTML de SAP
+        // Procesar archivo de SAP
         function procesarArchivoSAP(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            console.log('Archivo seleccionado:', file.name, 'Tamaño:', file.size);
-            mostrarAlerta('⏳ Procesando archivo...', 'warning');
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    console.log('Archivo leído, procesando...');
-                    let contenido = e.target.result;
-                    const fileName = file.name.toLowerCase();
-                    
-                    let productos = [];
-                    
-                    // Detectar tipo de archivo
-                    if (fileName.endsWith('.xls') || fileName.endsWith('.xlsx') || fileName.endsWith('.txt') || fileName.endsWith('.csv')) {
-                        console.log('Detectado como archivo Excel/TSV');
-                        // Parsear archivo Excel/TSV
-                        productos = parsearExcel(contenido);
-                    } else {
-                        console.log('Detectado como archivo MHTML');
-                        // Parsear archivo MHTML
-                        productos = parsearMHTML(contenido);
-                    }
-                    
-                    console.log('Productos procesados:', productos.length);
-                    
-                    inventarioTemporal = productos;
-                    
-                    if (inventarioTemporal.length === 0) {
-                        mostrarAlerta('❌ No se encontraron productos en el archivo. Verifica la consola (F12) para más detalles.', 'error');
-                        return;
-                    }
-
-                    mostrarVistaPrevia(inventarioTemporal);
-                    mostrarAlerta(`✅ Archivo procesado: ${inventarioTemporal.length} productos encontrados`, 'success');
-                } catch (error) {
-                    console.error('Error procesando archivo:', error);
-                    mostrarAlerta('❌ Error al procesar el archivo: ' + error.message, 'error');
+            try {
+                const file = event.target.files[0];
+                
+                if (!file) {
+                    alert('No se seleccionó ningún archivo');
+                    return;
                 }
-            };
-            
-            reader.onerror = function(error) {
-                console.error('Error leyendo archivo:', error);
-                mostrarAlerta('❌ Error al leer el archivo', 'error');
-            };
-            
-            // Leer como texto con encoding UTF-8 por defecto
-            reader.readAsText(file, 'UTF-8');
+                
+                console.log('✅ Archivo seleccionado:', file.name, file.size, 'bytes');
+                mostrarAlerta(`⏳ Procesando ${file.name}...`, 'warning');
+                
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    try {
+                        console.log('✅ Archivo leído:', e.target.result.length, 'caracteres');
+                        
+                        const contenido = e.target.result;
+                        const fileName = file.name.toLowerCase();
+                        
+                        let productos = [];
+                        
+                        // Detectar tipo de archivo
+                        if (fileName.endsWith('.xls') || fileName.endsWith('.xlsx') || fileName.endsWith('.txt') || fileName.endsWith('.csv')) {
+                            console.log('📄 Parseando como Excel/TSV');
+                            productos = parsearExcel(contenido);
+                        } else {
+                            console.log('📄 Parseando como MHTML');
+                            productos = parsearMHTML(contenido);
+                        }
+                        
+                        console.log('✅ Productos parseados:', productos.length);
+                        
+                        inventarioTemporal = productos;
+                        
+                        if (inventarioTemporal.length === 0) {
+                            mostrarAlerta('❌ No se encontraron productos en el archivo. Revisa la consola (F12)', 'error');
+                            return;
+                        }
+                        
+                        mostrarVistaPrevia(inventarioTemporal);
+                        mostrarAlerta(`✅ ${inventarioTemporal.length} productos cargados correctamente`, 'success');
+                        
+                    } catch (error) {
+                        console.error('❌ Error procesando contenido:', error);
+                        mostrarAlerta('❌ Error al procesar: ' + error.message, 'error');
+                    }
+                };
+                
+                reader.onerror = function(error) {
+                    console.error('❌ Error leyendo archivo:', error);
+                    mostrarAlerta('❌ Error al leer el archivo', 'error');
+                };
+                
+                reader.readAsText(file);
+                
+            } catch (error) {
+                console.error('❌ Error general:', error);
+                alert('Error: ' + error.message);
+            }
         }
 
         // Parser de archivo Excel/TSV

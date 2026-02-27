@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📦 Conteo Inventario - Ivan</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #000000 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            padding: 15px;
+            padding-bottom: 80px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #cc0000 0%, #8b0000 100%);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(204, 0, 0, 0.3);
+        }
+
+        .header h1 {
+            font-size: 1.5em;
+            margin-bottom: 5px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            border: 2px solid #cc0000;
+        }
+
+        .stat-card h3 {
+            color: #fbbc04;
+            font-size: 2em;
+            margin-bottom: 5px;
+        }
+
+        .stat-card p {
+            color: #cccccc;
+            font-size: 0.9em;
+        }
+
+        .section {
+            background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            border: 2px solid #cc0000;
+        }
+
+        .section h2 {
+            color: #cc0000;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .producto-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border-left: 4px solid #fbbc04;
+        }
+
+        .producto-item.completado {
+            border-left-color: #4caf50;
+            opacity: 0.7;
+        }
+
+        .producto-header {
+            margin-bottom: 10px;
+        }
+
+        .producto-sku {
+            color: #fbbc04;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .producto-nombre {
+            color: #ccc;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .producto-teorico {
+            background: rgba(204, 0, 0, 0.2);
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border: 1px solid #cc0000;
+        }
+
+        .producto-teorico strong {
+            color: #fbbc04;
+        }
+
+        .input-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 10px 0;
+        }
+
+        .input-wrapper {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-wrapper label {
+            color: #fbbc04;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .input-wrapper input {
+            padding: 12px;
+            border: 2px solid #cc0000;
+            border-radius: 8px;
+            font-size: 1.1em;
+            background: #1a1a1a;
+            color: #ffffff;
+            text-align: center;
+        }
+
+        .input-wrapper input:focus {
+            outline: none;
+            border-color: #fbbc04;
+            box-shadow: 0 0 10px rgba(251, 188, 4, 0.3);
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
+            color: white;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #cc0000 0%, #8b0000 100%);
+            color: white;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .alert-success {
+            background: rgba(76, 175, 80, 0.2);
+            border: 1px solid #4caf50;
+            color: #4caf50;
+        }
+
+        .alert-error {
+            background: rgba(244, 67, 54, 0.2);
+            border: 1px solid #f44336;
+            color: #f44336;
+        }
+
+        .alert-warning {
+            background: rgba(251, 188, 4, 0.2);
+            border: 1px solid #fbbc04;
+            color: #fbbc04;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #fbbc04;
+            font-size: 1.2em;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .fixed-bottom {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, #1a1a1a 0%, #000000 100%);
+            padding: 15px;
+            box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.5);
+            border-top: 2px solid #cc0000;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .verificacion-badge {
+            display: inline-block;
+            background: #f44336;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.8em;
+            margin-left: 10px;
+        }
+
+        .diferencia-warning {
+            background: rgba(244, 67, 54, 0.2);
+            border: 2px solid #f44336;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+            color: #f44336;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .progress-bar {
+            background: rgba(255, 255, 255, 0.1);
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #cc0000, #fbbc04);
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER -->
+        <div class="header">
+            <h1>📦 Conteo de Inventario</h1>
+            <p>Ivan - CEDI San Gil</p>
+            <p style="font-size: 0.9em; opacity: 0.8; margin-top: 5px;" id="fechaHoy"></p>
+        </div>
+
+        <!-- ESTADÍSTICAS -->
+        <div class="stats">
+            <div class="stat-card">
+                <h3 id="totalProductos">0</h3>
+                <p>Total Productos</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="productosContados">0</h3>
+                <p>Contados</p>
+            </div>
+        </div>
+
+        <!-- BARRA DE PROGRESO -->
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+        </div>
+
+        <!-- ALERTAS -->
+        <div id="alertContainer"></div>
+
+        <!-- SECCIÓN: PRODUCTOS PARA CONTAR -->
+        <div class="section">
+            <h2>📋 Productos para Contar</h2>
+            <div id="productosContainer">
+                <div class="loading">⏳ Cargando productos...</div>
+            </div>
+        </div>
+
+        <!-- SECCIÓN: VERIFICACIONES PENDIENTES -->
+        <div class="section hidden" id="verificacionesSection">
+            <h2>⚠️ Verificaciones Pendientes</h2>
+            <p style="color: #f44336; margin-bottom: 15px;">Los siguientes productos requieren re-conteo:</p>
+            <div id="verificacionesContainer"></div>
+        </div>
+    </div>
+
+    <!-- BOTÓN FIJO ENVIAR -->
+    <div class="fixed-bottom hidden" id="btnEnviarContainer">
+        <button class="btn btn-primary" onclick="enviarInventario()">
+            ✅ Enviar Inventario Completo
+        </button>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://etxtmdljkxdaonyldcmn.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV0eHRtZGxqa3hkYW9ueWxkY21uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0NDE1OTAsImV4cCI6MjA3OTAxNzU5MH0.SII1FIsgyuSv1oI1_xJs_MOUvYxNTnJsBEXigbZsosk';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let productos = [];
+        let conteos = {};
+        const UNIDADES_POR_CAJA = 12; // Ajusta según tu negocio
+
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', function() {
+            mostrarFechaHoy();
+            cargarProductos();
+            cargarVerificaciones();
+        });
+
+        // Mostrar fecha de hoy
+        function mostrarFechaHoy() {
+            const hoy = new Date();
+            const opciones = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('fechaHoy').textContent = hoy.toLocaleDateString('es-CO', opciones);
+        }
+
+        // Cargar productos del inventario teórico
+        async function cargarProductos() {
+            try {
+                const { data, error } = await supabase
+                    .from('inventario_teorico')
+                    .select('*')
+                    .eq('activo', true)
+                    .order('sku');
+
+                if (error) throw error;
+
+                productos = data || [];
+                
+                if (productos.length === 0) {
+                    document.getElementById('productosContainer').innerHTML = 
+                        '<div class="empty">❌ No hay inventario teórico cargado.<br>Por favor contacta al administrador.</div>';
+                    return;
+                }
+
+                document.getElementById('totalProductos').textContent = productos.length;
+                renderProductos();
+
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('productosContainer').innerHTML = 
+                    '<div class="alert alert-error">❌ Error al cargar productos</div>';
+            }
+        }
+
+        // Renderizar productos
+        function renderProductos() {
+            const container = document.getElementById('productosContainer');
+            
+            container.innerHTML = productos.map(p => {
+                const contado = conteos[p.sku];
+                const claseCompletado = contado ? 'completado' : '';
+                
+                return `
+                    <div class="producto-item ${claseCompletado}" id="producto-${p.sku}">
+                        <div class="producto-header">
+                            <div class="producto-sku">
+                                ${p.sku}
+                                ${contado ? '<span style="color: #4caf50; margin-left: 10px;">✓</span>' : ''}
+                            </div>
+                            <div class="producto-nombre">${p.nombre_producto}</div>
+                        </div>
+
+                        <div class="producto-teorico">
+                            <strong>📦 Inventario Teórico:</strong><br>
+                            ${p.cajas_teoricas} cajas + ${p.botellas_teoricas} botellas
+                        </div>
+
+                        <div class="input-group">
+                            <div class="input-wrapper">
+                                <label>Cajas físicas:</label>
+                                <input type="number" 
+                                       id="cajas-${p.sku}" 
+                                       min="0" 
+                                       value="${contado ? contado.cajas : ''}"
+                                       placeholder="0"
+                                       onchange="actualizarConteo('${p.sku}', ${p.cajas_teoricas}, ${p.botellas_teoricas})">
+                            </div>
+                            <div class="input-wrapper">
+                                <label>Botellas físicas:</label>
+                                <input type="number" 
+                                       id="botellas-${p.sku}" 
+                                       min="0" 
+                                       value="${contado ? contado.botellas : ''}"
+                                       placeholder="0"
+                                       onchange="actualizarConteo('${p.sku}', ${p.cajas_teoricas}, ${p.botellas_teoricas})">
+                            </div>
+                        </div>
+
+                        <div id="warning-${p.sku}"></div>
+                    </div>
+                `;
+            }).join('');
+
+            actualizarEstadisticas();
+        }
+
+        // Actualizar conteo de un producto
+        function actualizarConteo(sku, cajasTeoricas, botellasTeoricas) {
+            const cajas = parseInt(document.getElementById(`cajas-${sku}`).value) || 0;
+            const botellas = parseInt(document.getElementById(`botellas-${sku}`).value) || 0;
+
+            conteos[sku] = {
+                cajas: cajas,
+                botellas: botellas
+            };
+
+            // Calcular diferencia en cajas (decimal)
+            const totalTeoricoBotellas = (cajasTeoricas * UNIDADES_POR_CAJA) + botellasTeoricas;
+            const totalFisicoBotellas = (cajas * UNIDADES_POR_CAJA) + botellas;
+            const diferenciaBotellas = Math.abs(totalFisicoBotellas - totalTeoricoBotellas);
+            const diferenciaCajas = diferenciaBotellas / UNIDADES_POR_CAJA;
+
+            // Mostrar advertencia si diferencia >= 0.5 cajas
+            const warningDiv = document.getElementById(`warning-${sku}`);
+            if (diferenciaCajas >= 0.5) {
+                warningDiv.innerHTML = `
+                    <div class="diferencia-warning">
+                        ⚠️ DIFERENCIA ALTA: ${diferenciaCajas.toFixed(2)} cajas
+                        <br>Requerirá verificación
+                    </div>
+                `;
+            } else {
+                warningDiv.innerHTML = '';
+            }
+
+            // Marcar como completado
+            const item = document.getElementById(`producto-${sku}`);
+            if (cajas > 0 || botellas > 0) {
+                item.classList.add('completado');
+            } else {
+                item.classList.remove('completado');
+            }
+
+            actualizarEstadisticas();
+        }
+
+        // Actualizar estadísticas y progreso
+        function actualizarEstadisticas() {
+            const contados = Object.keys(conteos).length;
+            document.getElementById('productosContados').textContent = contados;
+
+            const progreso = productos.length > 0 ? (contados / productos.length) * 100 : 0;
+            document.getElementById('progressFill').style.width = progreso + '%';
+
+            // Mostrar botón enviar si hay conteos
+            if (contados > 0) {
+                document.getElementById('btnEnviarContainer').classList.remove('hidden');
+            } else {
+                document.getElementById('btnEnviarContainer').classList.add('hidden');
+            }
+        }
+
+        // Enviar inventario completo
+        async function enviarInventario() {
+            const contados = Object.keys(conteos).length;
+            
+            if (contados === 0) {
+                mostrarAlerta('❌ No hay productos contados', 'error');
+                return;
+            }
+
+            if (!confirm(`¿Enviar inventario con ${contados} productos contados?`)) {
+                return;
+            }
+
+            mostrarAlerta('⏳ Enviando inventario...', 'warning');
+
+            try {
+                const registros = [];
+
+                for (const sku in conteos) {
+                    const producto = productos.find(p => p.sku === sku);
+                    if (!producto) continue;
+
+                    const cajasFisicas = conteos[sku].cajas;
+                    const botellasFisicas = conteos[sku].botellas;
+
+                    // Calcular si requiere verificación
+                    const totalTeoricoBotellas = (producto.cajas_teoricas * UNIDADES_POR_CAJA) + producto.botellas_teoricas;
+                    const totalFisicoBotellas = (cajasFisicas * UNIDADES_POR_CAJA) + botellasFisicas;
+                    const diferenciaBotellas = Math.abs(totalFisicoBotellas - totalTeoricoBotellas);
+                    const diferenciaCajas = diferenciaBotellas / UNIDADES_POR_CAJA;
+                    const requiere_verificacion = diferenciaCajas >= 0.5;
+
+                    registros.push({
+                        sku: sku,
+                        nombre_producto: producto.nombre_producto,
+                        cajas_teoricas: producto.cajas_teoricas,
+                        botellas_teoricas: producto.botellas_teoricas,
+                        cajas_fisicas: cajasFisicas,
+                        botellas_fisicas: botellasFisicas,
+                        requiere_verificacion: requiere_verificacion,
+                        verificado: false,
+                        usuario: 'Ivan'
+                    });
+                }
+
+                const { error } = await supabase
+                    .from('conteo_fisico')
+                    .insert(registros);
+
+                if (error) throw error;
+
+                mostrarAlerta(`✅ Inventario enviado: ${registros.length} productos`, 'success');
+                
+                // Limpiar conteos
+                conteos = {};
+                renderProductos();
+                
+                // Scroll al inicio
+                window.scrollTo(0, 0);
+
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarAlerta('❌ Error al enviar inventario: ' + error.message, 'error');
+            }
+        }
+
+        // Cargar verificaciones pendientes
+        async function cargarVerificaciones() {
+            try {
+                const { data, error } = await supabase
+                    .from('conteo_fisico')
+                    .select('*')
+                    .eq('requiere_verificacion', true)
+                    .eq('verificado', false);
+
+                if (error) throw error;
+
+                if (data && data.length > 0) {
+                    document.getElementById('verificacionesSection').classList.remove('hidden');
+                    renderVerificaciones(data);
+                }
+
+            } catch (error) {
+                console.error('Error cargando verificaciones:', error);
+            }
+        }
+
+        // Renderizar verificaciones
+        function renderVerificaciones(verificaciones) {
+            const container = document.getElementById('verificacionesContainer');
+            
+            container.innerHTML = verificaciones.map(v => `
+                <div class="producto-item" style="border-left-color: #f44336;">
+                    <div class="producto-header">
+                        <div class="producto-sku">
+                            ${v.sku}
+                            <span class="verificacion-badge">VERIFICAR</span>
+                        </div>
+                        <div class="producto-nombre">${v.nombre_producto}</div>
+                    </div>
+
+                    <div class="producto-teorico">
+                        <strong>Primer conteo:</strong><br>
+                        ${v.cajas_fisicas} cajas + ${v.botellas_fisicas} botellas
+                    </div>
+
+                    <div class="input-group">
+                        <div class="input-wrapper">
+                            <label>RE-CONTAR Cajas:</label>
+                            <input type="number" 
+                                   id="verif-cajas-${v.id}" 
+                                   min="0" 
+                                   placeholder="0">
+                        </div>
+                        <div class="input-wrapper">
+                            <label>RE-CONTAR Botellas:</label>
+                            <input type="number" 
+                                   id="verif-botellas-${v.id}" 
+                                   min="0" 
+                                   placeholder="0">
+                        </div>
+                    </div>
+
+                    <button class="btn btn-success" onclick="enviarVerificacion(${v.id}, '${v.sku}', '${v.nombre_producto}')">
+                        ✅ Enviar Verificación
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // Enviar verificación
+        async function enviarVerificacion(conteoId, sku, nombre) {
+            const cajas = parseInt(document.getElementById(`verif-cajas-${conteoId}`).value) || 0;
+            const botellas = parseInt(document.getElementById(`verif-botellas-${conteoId}`).value) || 0;
+
+            if (cajas === 0 && botellas === 0) {
+                alert('Debes ingresar al menos una cantidad');
+                return;
+            }
+
+            try {
+                // Insertar verificación
+                const { error: errorVerif } = await supabase
+                    .from('verificaciones')
+                    .insert({
+                        conteo_id: conteoId,
+                        sku: sku,
+                        nombre_producto: nombre,
+                        cajas_verificadas: cajas,
+                        botellas_verificadas: botellas,
+                        usuario: 'Ivan'
+                    });
+
+                if (errorVerif) throw errorVerif;
+
+                // Marcar conteo como verificado
+                const { error: errorUpdate } = await supabase
+                    .from('conteo_fisico')
+                    .update({ verificado: true })
+                    .eq('id', conteoId);
+
+                if (errorUpdate) throw errorUpdate;
+
+                mostrarAlerta('✅ Verificación enviada', 'success');
+                cargarVerificaciones();
+
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarAlerta('❌ Error al enviar verificación: ' + error.message, 'error');
+            }
+        }
+
+        // Mostrar alerta
+        function mostrarAlerta(mensaje, tipo) {
+            const container = document.getElementById('alertContainer');
+            container.innerHTML = `<div class="alert alert-${tipo}">${mensaje}</div>`;
+            setTimeout(() => container.innerHTML = '', 5000);
+            window.scrollTo(0, 0);
+        }
+    </script>
+</body>
+</html>

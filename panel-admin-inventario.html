@@ -265,8 +265,8 @@
             
             <div id="alertContainer"></div>
 
-            <div class="file-upload" id="fileUploadArea">
-                <input type="file" id="fileInput" accept=".xls,.xlsx,.mhtml,.mht,.html,.htm,.txt,.csv">
+            <div class="file-upload" id="fileUploadArea" onclick="document.getElementById('fileInput').click()" style="cursor: pointer;">
+                <input type="file" id="fileInput" accept=".xls,.xlsx,.mhtml,.mht,.html,.htm,.txt,.csv" style="display: none;">
                 <p style="font-size: 3em; margin-bottom: 10px;">📁</p>
                 <p style="font-size: 1.2em; color: #fbbc04;">Click para seleccionar archivo de SAP</p>
                 <p style="color: #999; margin-top: 10px;">Formatos: Excel (.xls, .xlsx) o MHTML</p>
@@ -343,42 +343,8 @@
 
         // Inicializar
         document.addEventListener('DOMContentLoaded', function() {
-            // Configurar área de carga de archivos
-            const fileUploadArea = document.getElementById('fileUploadArea');
-            const fileInput = document.getElementById('fileInput');
-            
-            // Click en el área abre el selector de archivos
-            fileUploadArea.addEventListener('click', function() {
-                fileInput.click();
-            });
-            
             // Cambio en el input procesa el archivo
-            fileInput.addEventListener('change', procesarArchivoSAP);
-            
-            // Drag and drop
-            fileUploadArea.addEventListener('dragover', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                fileUploadArea.style.background = 'rgba(204, 0, 0, 0.2)';
-            });
-            
-            fileUploadArea.addEventListener('dragleave', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                fileUploadArea.style.background = 'rgba(204, 0, 0, 0.05)';
-            });
-            
-            fileUploadArea.addEventListener('drop', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                fileUploadArea.style.background = 'rgba(204, 0, 0, 0.05)';
-                
-                const files = e.dataTransfer.files;
-                if (files.length > 0) {
-                    fileInput.files = files;
-                    procesarArchivoSAP({ target: { files: files } });
-                }
-            });
+            document.getElementById('fileInput').addEventListener('change', procesarArchivoSAP);
             
             cargarEstadisticas();
             cargarConteos();

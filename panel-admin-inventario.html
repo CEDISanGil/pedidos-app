@@ -416,8 +416,8 @@
             const lineas = contenido.split(/\r?\n/);
             
             console.log(`📄 Total líneas en archivo: ${lineas.length}`);
-            console.log(`📄 Primera línea: ${lineas[0]}`);
-            console.log(`📄 Segunda línea: ${lineas[1]}`);
+            if (lineas.length > 0) console.log(`📄 Primera línea: ${lineas[0]}`);
+            if (lineas.length > 1) console.log(`📄 Segunda línea: ${lineas[1]}`);
             
             let productosProcesados = 0;
             let lineasSaltadas = 0;
@@ -432,20 +432,20 @@
                 // Dividir por tabuladores
                 const columnas = linea.split('\t');
                 
-                // Debug: mostrar primera fila con datos
-                if (i === 2 && columnas.length > 0) {
-                    console.log(`📄 Ejemplo de fila ${i}:`, columnas);
-                    console.log(`   Columnas encontradas: ${columnas.length}`);
+                // Debug: mostrar filas importantes
+                if (i <= 5 && columnas.length > 0) {
+                    console.log(`📄 Fila ${i}: ${columnas.length} columnas -`, columnas.slice(0, 7));
                 }
                 
-                // Debe tener al menos 8 columnas
-                if (columnas.length < 8) {
+                // Debe tener al menos 9 columnas
+                if (columnas.length < 9) {
                     lineasSaltadas++;
                     continue;
                 }
                 
-                // Extraer datos
-                // Estructura observada: [vacío, vacío, Material(SKU), Centro, Almacén, Nombre, UMB, Cajas, Botellas, ...]
+                // Extraer datos (índices array empiezan en 0)
+                // Columna 3 = índice 2, pero el archivo tiene 2 tabs al inicio, entonces:
+                // columnas[0] = vacío, columnas[1] = vacío, columnas[2] = SKU
                 const sku = columnas[2] ? columnas[2].trim() : '';
                 const nombre = columnas[5] ? columnas[5].trim() : '';
                 const cajasStr = columnas[7] ? columnas[7].trim() : '0';
@@ -459,7 +459,7 @@
                 
                 // Validar que no sea encabezado
                 if (nombre === 'Texto breve de material' || nombre === 'Material' || nombre === 'Materia') {
-                    console.log(`📄 Saltando encabezado: ${nombre}`);
+                    console.log(`📄 Saltando encabezado en fila ${i}: ${nombre}`);
                     lineasSaltadas++;
                     continue;
                 }
@@ -477,9 +477,9 @@
                 
                 productosProcesados++;
                 
-                // Mostrar primer producto como ejemplo
-                if (productosProcesados === 1) {
-                    console.log(`✅ Primer producto extraído:`, {
+                // Mostrar primeros 3 productos como ejemplo
+                if (productosProcesados <= 3) {
+                    console.log(`✅ Producto ${productosProcesados}:`, {
                         sku: sku,
                         nombre: nombre,
                         cajas: cajas,
